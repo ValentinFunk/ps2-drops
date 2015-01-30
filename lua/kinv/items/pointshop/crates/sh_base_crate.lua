@@ -10,7 +10,7 @@ function ITEM:initialize( )
 end
 
 function ITEM.static:GetPointshopIconControl( )
-	return "DPointshopTrailIcon"
+	return "DPointshopMaterialIcon"
 end
 
 function ITEM.static.getPersistence( )
@@ -25,6 +25,116 @@ end
 
 function ITEM.static.GetPointshopIconDimensions( )
 	return Pointshop2.GenerateIconSize( 2, 4 )
+end
+
+function ITEM.static.GetPointshopDescriptionControl( )
+	return "DCrateItemDescription"
+end
+
+function ITEM.static:GetCumulatedChances( )
+	local sum = 0
+	for k, v in pairs( self.itemMap ) do
+		sum = sum + v.chance
+	end
+	return sum
+end
+
+function ITEM.static:GetRequiredKeyClass( )
+	for k, itemClass in pairs( Pointshop2.GetRegisteredItems( ) ) do
+		if subclassOf( KInventory.Items.base_key, itemClass ) then
+			if itemClass.validCrate == self._persistenceId then
+				return itemClass
+			end
+		end
+	end
+end
+
+function ITEM:CanBeUsed( )
+	if not self:GetOwner( ):PS2_GetFirstItemOfClass( self.class:GetRequiredKeyClass( ) ) then
+		return false, "You do not own the required key to open this crate"
+	end
+	
+	return true
+end
+
+function ITEM:OnUse( )
+	local ply = self:GetOwner( )
+	
+	local key = self:GetOwner( ):PS2_GetFirstItemOfClass( self.class:GetRequiredKeyClass( ) )
+	Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, key )
+	:Then( function( )
+		self:Unbox( )
+		KLogf( 4, "Player %s unboxed a crate", ply:Nick( ) )
+	end, function( errid, err ) 
+		KLogf( 2, "Error unboxing crate item: %s", err )
+	end )
+end
+
+function ITEM:Unbox( )
+	local ply = self:GetOwner( )
+	
+	--Generate cumulative sum table
+	local sumTbl = {}
+	local sum = 0
+	for k, info in pairs( self.itemMap ) do
+		sum = sum + info.chance
+		local factoryClass = getClass( info.factoryClassName )
+		if not factoryClass then
+			continue
+		end
+		
+		local instance = factoryClass:new( )
+		instance.settings = info.factorySettings
+		
+		table.insert( sumTbl, {sum = sum, factory = instance })
+	end
+
+	--Pick element
+	local r = math.random() * sum
+	local factory
+	for _, info in ipairs( sumTbl ) do
+		if info.sum > r then
+			factory = info.factory
+			break
+		end
+	end
+	
+	if not factory then 
+		KLogf( 3, "[ERROR] Could not unbox crate!" )
+		PrintTable( sumTbl )
+		print( r )
+		error( ) --Abort and try to restore
+		return
+	end
+	
+	local item = factory:CreateItem( )
+	:Then( function( item )
+		local price = item.class:GetBuyPrice( ply )
+		item.purchaseData = {
+			time = os.time( ),
+			origin = "Crate"
+		}
+		if price.points then
+			item.purchaseData.amount = price.points
+			item.purchaseData.currency = "points" 
+		elseif price.premiumPoints then
+			item.purchaseData.amount = price.points
+			item.purchaseData.currency = "premiumPoints" 
+		else
+			item.purchaseData.amount = 0
+			item.purchaseData.currency = "points" 
+		end
+		return item:save( )
+	end )
+	:Then( function( item )
+		KInventory.ITEMS[item.id] = item
+		return ply.PS2_Inventory:addItem( item )
+		:Then( function( )
+			item:OnPurchased( )
+			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
+			return item
+		end )
+	end )
 end
 
 /*

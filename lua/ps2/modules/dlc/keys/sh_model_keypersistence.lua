@@ -4,16 +4,21 @@ local KeyPersistence = Pointshop2.KeyPersistence
 KeyPersistence.static.DB = "Pointshop2"
 
 KeyPersistence.static.model = {
-	tableName = "ps2_cratepersistence",
+	tableName = "ps2_keypersistence",
 	fields = {
 		itemPersistenceId = "int",
 		material = "string",
-		validCrates = "luadata" --lazy way
+		validCrate = "int"
 	},
 	belongsTo = {
 		ItemPersistence = {
 			class = "Pointshop2.ItemPersistence",
 			foreignKey = "itemPersistenceId",
+			onDelete = "CASCADE"
+		},
+		CratePersistence = {
+			class = "Pointshop2.ItemPersistence",
+			foreignKey = "validCrate",
 			onDelete = "CASCADE"
 		}
 	}
@@ -36,7 +41,7 @@ function KeyPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate 
 	end )
 	:Then( function( key )
 		key.material = saveTable.material
-		key.validCrates = saveTable.validCrates
+		key.validCrate = saveTable.validCrate
 		return key:save( )
 	end )
 end

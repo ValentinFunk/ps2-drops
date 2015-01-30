@@ -65,26 +65,33 @@ Don't forget to upload the material to your fastdl, too!]] )
 	
 	local lbl = vgui.Create( "DLabel", self )
 	lbl:Dock( TOP )
-	lbl:SetText( "Select the crates that this key open" )
+	lbl:SetText( "Select the crate type that this key can unlock:" )
 	lbl:SizeToContents( )
 	lbl:DockMargin( 5, 0, 5, 5 )
 	
-	self.slotLayout = vgui.Create( "DIconLayout", self )
-	self.slotLayout:Dock( TOP )
-	self.slotLayout:DockMargin( 5, 5, 5, 5 )
-	self.slotLayout:SetSpaceX( 10 )
-	self.slotLayout:SetSpaceY( 5 )
-	local old = self.slotLayout.PerformLayout
-	function self.slotLayout:PerformLayout( )
-		old( self )
-	Pointshop2.GetCrateClasses( )
+	self.scroll = vgui.Create( "DScrollPanel", self ) 
+	self.scroll:SetTall( 80 )
+	self.scroll:Dock( TOP )
+	self.scroll:DockMargin( 5, 5, 5, 5 )
+	
+	self.choice = vgui.Create( "DRadioChoice", self.scroll )
+	self.choice:DockMargin( 5, 5, 5, 5 )
+	function self.choice:PerformLayout( )
+		self:SizeToChildren( false, true )
 	end
-	self.checkBoxes = {}
-	for _, itemClass in pairs( Pointshop2.Drops.GetCrateClasses( ) ) do
-		local chkBox = vgui.Create( "DCheckBoxLabel", self.slotLayout )
-		chkBox:SetText( itemClass.PrintName )
-		chkBox:SizeToContents( )
-		self.checkBoxes[itemClass.name] = chkBox
+	
+	local classes = Pointshop2.Drops.GetCrateClasses( )
+	for _, itemClass in pairs( classes ) do
+		self.choice:AddOption( itemClass.PrintName ).class = itemClass
+	end
+	
+	if #classes == 0 then
+		local lbl = vgui.Create( "DLabel", self )
+		lbl:Dock( TOP )
+		lbl:SetText( "No crates created yet" )
+		lbl:SizeToContents( )
+		lbl:DockMargin( 20, 0, 5, 5 )
+		lbl:SetColor( color_white )
 	end
 	
 	timer.Simple( 0, function( )
@@ -96,6 +103,7 @@ function PANEL:SaveItem( saveTable )
 	self.BaseClass.SaveItem( self, saveTable )
 	
 	saveTable.material = self.manualEntry:GetText( )
+	saveTable.validCrate = self.choice:GetSelectedOption( ).class._persistenceId
 end
 
 function PANEL:EditItem( persistence, itemClass )
@@ -109,6 +117,10 @@ function PANEL:Validate( saveTable )
 	local succ, err = self.BaseClass.Validate( self, saveTable )
 	if not succ then
 		return succ, err
+	end
+	
+	if not self.choice:GetSelectedOption( ) then
+		return false, "You must select a crate type"
 	end
 	
 	return true

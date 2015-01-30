@@ -1,7 +1,9 @@
 local PANEL = {}
 
 function PANEL:Init( )
-	self:addSectionTitle( "Crate Settings" )
+	self:SetSkin( Pointshop2.Config.DermaSkin )
+	
+	self:addSectionTitle( "Icon Settings" )
 	
 	/*
 		Table Element
@@ -64,12 +66,41 @@ Don't forget to upload the material to your fastdl, too!]] )
 	timer.Simple( 0, function( )
 		self:Center( )
 	end )
+	
+	self:addSectionTitle( "Crate Settings" )
+	self.openTableBtn = vgui.Create( "DButton" )
+	self.openTableBtn:SetText( "Manage Crate Contents" )
+	hook.Add( "Think", self.openTableBtn, function() self.openTableBtn:SetSkin( Pointshop2.Config.DermaSkin ) end )
+	self.openTableBtn:ApplySchemeSettings( )
+	self.openTableBtn:PerformLayout( )
+	self.openTableBtn:SetSize( 200, 50 )
+	function self.openTableBtn.DoClick( )
+		self.settingsDialog = vgui.Create( "DCrateSettingsDialog" )
+		self.settingsDialog:MakePopup( )
+		self.settingsDialog:Center( )
+		if self.savedCrateMappings then
+			self.settingsDialog:Load( self.savedCrateMappings )
+		end
+		function self.settingsDialog.OnSave( dialog, data )
+			self.settingsDialog:Remove( )
+			self.savedCrateMappings = data
+		end
+	end
+	
+	local cont = self:addFormItem( "Settings", self.openTableBtn )
+end
+
+function PANEL:OnClose( )
+	if IsValid( self.settingsDialog ) then
+		self.settingsDialog:Close( )
+	end
 end
 
 function PANEL:SaveItem( saveTable )
 	self.BaseClass.SaveItem( self, saveTable )
 	
 	saveTable.material = self.manualEntry:GetText( )
+	saveTable.itemMap = self.savedCrateMappings
 end
 
 function PANEL:EditItem( persistence, itemClass )
@@ -77,12 +108,17 @@ function PANEL:EditItem( persistence, itemClass )
 	
 	self.manualEntry:SetText( persistence.material )
 	self.materialPanel:SetMaterial( persistence.material )
+	self.savedCrateMappings = persistence.itemMap
 end
 
 function PANEL:Validate( saveTable )
 	local succ, err = self.BaseClass.Validate( self, saveTable )
 	if not succ then
 		return succ, err
+	end
+	
+	if not self.savedCrateMappings then
+		return false, "The crate is emtpy! Please add some items!"
 	end
 	
 	return true

@@ -20,7 +20,7 @@ end
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	ITEM.super.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
 	itemTable.material = persistenceItem.material
-	itemTable.validCrates = persistenceItem.validCrates
+	itemTable.validCrate = persistenceItem.validCrate
 end
 
 function ITEM.static.GetPointshopIconDimensions( )
