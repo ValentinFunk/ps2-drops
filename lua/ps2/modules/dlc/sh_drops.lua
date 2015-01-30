@@ -13,3 +13,15 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 		creator = "DKeyCreator"
 	} )
 end )
+
+Pointshop2.Drops = {}
+
+function Pointshop2.Drops.GetCrateClasses( )
+	local classes = { }
+	for _, itemClass in pairs( KInventory.Items ) do
+		if subclassOf( KInventory.Items.base_crate, itemClass ) then
+			table.insert( classes, itemClass )
+		end
+	end
+	return classes
+end

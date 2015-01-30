@@ -61,6 +61,32 @@ Don't forget to upload the material to your fastdl, too!]] )
 	local cont = self:addFormItem( "Material", self.selectMatElem )
 	cont:SetTall( 64 )
 	
+	self:addSectionTitle( "Crates" )
+	
+	local lbl = vgui.Create( "DLabel", self )
+	lbl:Dock( TOP )
+	lbl:SetText( "Select the crates that this key open" )
+	lbl:SizeToContents( )
+	lbl:DockMargin( 5, 0, 5, 5 )
+	
+	self.slotLayout = vgui.Create( "DIconLayout", self )
+	self.slotLayout:Dock( TOP )
+	self.slotLayout:DockMargin( 5, 5, 5, 5 )
+	self.slotLayout:SetSpaceX( 10 )
+	self.slotLayout:SetSpaceY( 5 )
+	local old = self.slotLayout.PerformLayout
+	function self.slotLayout:PerformLayout( )
+		old( self )
+	Pointshop2.GetCrateClasses( )
+	end
+	self.checkBoxes = {}
+	for _, itemClass in pairs( Pointshop2.Drops.GetCrateClasses( ) ) do
+		local chkBox = vgui.Create( "DCheckBoxLabel", self.slotLayout )
+		chkBox:SetText( itemClass.PrintName )
+		chkBox:SizeToContents( )
+		self.checkBoxes[itemClass.name] = chkBox
+	end
+	
 	timer.Simple( 0, function( )
 		self:Center( )
 	end )
