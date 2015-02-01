@@ -12,6 +12,53 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 		icon = "pointshop2/key63.png",
 		creator = "DKeyCreator"
 	} )
+	
+	MODULE.Settings.Server.DropsTableSettings = {
+		info = {
+			label = "Drops Settings",
+			isManualSetting = true, --Ignored by AutoAddSettingsTable
+		},
+		DropsData = {
+			value = true,
+			type = "table"
+		},
+	}
+	
+	MODULE.Settings.Server.DropsSettings = {
+		info = {
+			label = "Drops Settings",
+		},
+		EnableDrops = {
+			value = true,
+			label = "Enable Drops system",
+		},
+		UseGamemodeDrops = {
+			value = true,
+			label = "Use Gamemode Events",
+			tooltip = "Uses gamemode events to give drops only on round end. Only works for gamemodes with an integration plugin."
+		},
+		DropFrequency = {
+			value = 5,
+			label = "Drop frequency (in Minutes)",
+			tooltip = "Set the drop frequency."
+		},
+		DropChance = {
+			value = 10,
+			label = "Drop Chance (in Percent)",
+			tooltip = "Chance that a player gets a drop when a drop is triggered."
+		}, 
+		BroadcastDrops = {
+			value = true, 
+			label = "Broadcast Drops in Chat",
+			tooltip = "Posts a message to chat whenever a player gets a drop."
+		}
+	}
+	
+	table.insert( MODULE.SettingButtons, {
+		label = "Drops Setup",
+		icon = "pointshop2/inbox3.png",
+		control = "DPointshopDropsConfigurator"
+	} )
 end )
 
 Pointshop2.Drops = {}
@@ -25,6 +72,15 @@ function Pointshop2.Drops.GetCrateClasses( )
 	end
 	return classes
 end
+
+Pointshop2.Drops.Rarities = {
+	{ name = "Very Common", chance = 101 },
+	{ name = "Common", chance = 47 },
+	{ name = "Uncommon", chance = 21 },
+	{ name = "Rare", chance = 10 },
+	{ name = "Very Rare", chance = 4 },
+	{ name = "Extremely Rare", chance = 1 },
+}
 
 --Chance -> Name
 Pointshop2.Drops.RarityMap = {
@@ -44,3 +100,12 @@ Pointshop2.Drops.RarityColorMap = {
 	[4] = Color( 163, 53, 236 ),
 	[1] = Color( 255, 128, 0 )
 }
+
+if SERVER then
+	util.AddNetworkString( "PS2D_AddChatText" )
+end
+if CLIENT then
+	net.Receive( "PS2D_AddChatText", function( )
+		chat.AddText( unpack( net.ReadTable( ) ) )
+	end )
+end

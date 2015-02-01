@@ -48,7 +48,7 @@ function PANEL:AddKeyInfo( )
 	end
 	
 	local name
-	local keyClass = itemDesc.itemClass:GetRequiredKeyClass( )
+	local keyClass = self.itemClass:GetRequiredKeyClass( )
 	if not keyClass then
 		KLogf( 3, "[ERROR] Invalid key class for item %s", tostring( itemDesc.itemClass ) )
 		name = "ERROR"
@@ -95,6 +95,7 @@ function PANEL:AddCrateContentInfo( )
 	end
 	Derma_Hook( pnl, "Paint", "Paint", "InnerPanel" )
 
+	table.SortByMember( self.itemClass.itemMap, "chance", true )
 	for k, info in pairs( self.itemClass.itemMap ) do
 		local factoryClass = getClass( info.factoryClassName )
 		if not factoryClass then continue end

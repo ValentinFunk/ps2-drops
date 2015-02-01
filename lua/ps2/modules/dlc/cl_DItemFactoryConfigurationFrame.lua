@@ -4,7 +4,7 @@ function PANEL:Init( )
 	self:SetTitle( "Add an Item Type" )
 	
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	self:SetSize( 400, 600 )
+	self:SetSize( 800, math.Clamp( ScrH( ), 0, 768 ) )
 	
 	self.steps = vgui.Create( "DStepPanel", self )
 	self.steps:Dock( FILL )

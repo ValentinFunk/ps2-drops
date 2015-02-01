@@ -26,6 +26,8 @@ function PANEL:Init( )
 		frame:MakePopup( )
 		frame:Center( )
 		function frame.OnFinish( frame, class, settings )
+			if not settings then return end
+			
 			frame:Remove( )
 			self:AddFactory( class, settings )
 		end
@@ -37,8 +39,8 @@ function PANEL:GenerateChanceControl( line )
 	pnl:DockPadding( 10, 3, 10, 3 )
 	
 	pnl.dropdown = vgui.Create( "DComboBox", pnl )
-	for rarity, name in pairs( Pointshop2.Drops.RarityMap ) do
-		pnl.dropdown:AddChoice( name, rarity )
+	for k, v in ipairs( Pointshop2.Drops.Rarities ) do
+		pnl.dropdown:AddChoice( v.name, v.chance )
 	end
 	
 	pnl.dropdown:Dock( LEFT )
@@ -92,7 +94,7 @@ function PANEL:GenerateActionsControl( line )
 	pnl.edit:SetText( "Configure" )
 	function pnl.edit.DoClick( )
 		local frame = vgui.Create( "DFrame" )
-		frame:SetSize( 400, 600 )
+		frame:SetSize( 800, math.Clamp( ScrH( ), 0, 768 ) )
 		frame:SetTitle( "Edit Settings" )
 		frame:SetSkin( Pointshop2.Config.DermaSkin )
 		
@@ -104,6 +106,8 @@ function PANEL:GenerateActionsControl( line )
 		frame.save:Dock( BOTTOM )
 		frame.save:SetText( "Save" )
 		function frame.save.DoClick( )
+			if not ctrl:GetSettingsForSave( ) then return end 
+			
 			line.factory.settings = ctrl:GetSettingsForSave( )
 			line.Columns[1]:SetText( line.factory:GetShortDesc( ) )
 			frame:Remove( )
@@ -117,6 +121,9 @@ function PANEL:GenerateActionsControl( line )
 	pnl.remove:SetText( "Remove" )
 	function pnl.remove.DoClick( )
 		self.itemTable:RemoveLine( line:GetID( ) )
+		timer.Simple( 0, function( )
+			hook.Call( "UpdateChance" )
+		end)
 	end
 	pnl.remove:Dock( LEFT )
 	pnl.remove:DockMargin ( 5, 0, 0, 0 )
@@ -124,13 +131,16 @@ function PANEL:GenerateActionsControl( line )
 	return pnl
 end
 
-function PANEL:AddFactory( factoryClass, settings )
+function PANEL:AddFactory( factoryClass, settings, chance )
 	local instance = factoryClass:new( )
 	instance.settings = settings
 	
 	local line = self.itemTable:AddLine( instance:GetShortDesc( ) )
 	line.Columns[2] = self:GenerateChanceControl( line )
 	line.Columns[3] = self:GenerateActionsControl( line )
+	if chance then
+		line.Columns[2]:SetChanceAmount( chance )
+	end
 	
 	line.factory = instance
 end
@@ -154,7 +164,7 @@ function PANEL:LoadSaveData( data )
 			KLogf( 3, "[ERROR] Invalid factory class %s", tostring( v.factoryClassName ) )
 			continue
 		end
-		self:AddFactory( factoryClass, v.factorySettings )
+		self:AddFactory( factoryClass, v.factorySettings, v.chance )
 	end
 end
 

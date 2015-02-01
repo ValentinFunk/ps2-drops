@@ -37,7 +37,6 @@ function PointsFactory:CreateItem( )
 	item.currencyType = self.settings["BasicSettings.CurrencyType"]
 	return item:save( )
 	:Then( function( item )
-		PrintTable( item )
 		return item
 	end )
 end

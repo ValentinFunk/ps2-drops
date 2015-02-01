@@ -6,7 +6,7 @@ function PANEL:Init( )
 	self.infoPanel = vgui.Create( "DInfoPanel", self )
 	self.infoPanel:Dock( TOP )
 	self.infoPanel:SetInfo( "Points Giver", 
-[[This Item Creator is used to create items that give points to players when redeemed. ]] 
+[[This item factory is used to create items that give points to players when redeemed. ]] 
 	)
 	self.infoPanel:DockMargin( 0, 0, 0, 5 )
 
