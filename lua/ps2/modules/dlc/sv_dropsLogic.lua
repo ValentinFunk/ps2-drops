@@ -73,7 +73,12 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 		end )
 	end )
 	:Then( function( item )
-		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "DropsSettings.BroadcastDrops" ) then 
+		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastDrops" ) then 
+			return
+		end
+		
+		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.Drops.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
+		if chance > minimumBroadcastChance then
 			return
 		end
 		

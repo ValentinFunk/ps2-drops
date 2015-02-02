@@ -21,6 +21,7 @@ If a gamemode has an integration plugin, drops are given at round end, else they
 	self.actualSettings:Dock( LEFT )
 	self.actualSettings:AutoAddSettingsTable( { 
 		DropsSettings = Pointshop2.GetModule( "Pointshop 2 DLC" ).Settings.Server.DropsSettings,
+		BroadcastDropsSettings = Pointshop2.GetModule( "Pointshop 2 DLC" ).Settings.Server.BroadcastDropsSettings,
 		DropsTableSettings = Pointshop2.GetModule( "Pointshop 2 DLC" ).Settings.Server.DropsTableSettings
 	} )
 	self.actualSettings:DockMargin( 0, 0, 0, 5 )
@@ -36,7 +37,7 @@ If a gamemode has an integration plugin, drops are given at round end, else they
 	self.bottom:Dock( BOTTOM )
 	self.bottom:DockMargin( 5, 0, 5, 5 )
 	self.bottom:SetTall( 40 )
-	self.bottom:DockPadding( 5, 5, 5, 5 )
+	self.bottom:DockPadding( 5, 0, 0, 0 )
 	Derma_Hook( self.bottom, "Paint", "Paint", "InnerPanelBright" )
 	self.bottom:MoveToBack( )
 	
@@ -52,7 +53,6 @@ If a gamemode has an integration plugin, drops are given at round end, else they
 end
 
 function PANEL:SetData( data )
-	PrintTable( data )
 	self.actualSettings:SetData( data )
 	self.itemsTable:LoadSaveData( data["DropsTableSettings.DropsData"] )
 end

@@ -46,12 +46,37 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 			value = 10,
 			label = "Drop Chance (in Percent)",
 			tooltip = "Chance that a player gets a drop when a drop is triggered."
-		}, 
+		},
+	}
+	
+	MODULE.Settings.Server.BroadcastDropsSettings = {
+		info = {
+			label = "Drops Chat Print Settings",
+		},
+		BroadcastRarity = {
+			value = "Uncommon", 
+			type = "option",
+			label = "Broadcast minimum Rarity",
+			tooltip = "Broadcast only unbox / drops if the item is above this rarity treshold",
+			possibleValues = {
+				"Very Common",
+				"Common",
+				"Uncommon",
+				"Rare",
+				"Very Rare",
+				"Extremely Rare"
+			}
+		},
 		BroadcastDrops = {
 			value = true, 
-			label = "Broadcast Drops in Chat",
+			label = "Broadcast drops in chat",
 			tooltip = "Posts a message to chat whenever a player gets a drop."
-		}
+		},
+		BroadcastUnbox = {
+			value = true,
+			label = "Broadcast unbox rewards in chat",
+			tooltip = "Posts a message to chat whenever a player unboxes a crate."
+		},
 	}
 	
 	table.insert( MODULE.SettingButtons, {

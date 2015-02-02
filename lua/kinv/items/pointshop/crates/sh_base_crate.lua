@@ -86,16 +86,17 @@ function ITEM:Unbox( )
 		local instance = factoryClass:new( )
 		instance.settings = info.factorySettings
 		if instance:IsValid( ) then
-			table.insert( sumTbl, {sum = sum, factory = instance })
+			table.insert( sumTbl, {sum = sum, factory = instance, chance = info.chance })
 		end
 	end
 
 	--Pick element
 	local r = math.random() * sum
-	local factory
+	local factory, chance
 	for _, info in ipairs( sumTbl ) do
 		if info.sum > r then
 			factory = info.factory
+			chance = info.chance
 			break
 		end
 	end
@@ -135,6 +136,31 @@ function ITEM:Unbox( )
 			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
 			return item
 		end )
+	end )
+	:Done( function( item )
+		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then 
+			return
+		end
+		
+		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.Drops.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
+		if chance > minimumBroadcastChance then
+			return
+		end
+		
+		net.Start( "PS2D_AddChatText" )
+			net.WriteTable{
+				Color( 151, 211, 255 ),
+				"Player ",
+				Color( 255, 255, 0 ),
+				ply:Nick( ),
+				Color( 151, 211, 255 ),
+				" unboxed ",
+				Pointshop2.Drops.RarityColorMap[chance],
+				item:GetPrintName( ),
+				Color( 151, 211, 255 ),
+				"!"
+			}
+		net.Broadcast( )
 	end )
 end
 
