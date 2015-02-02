@@ -45,6 +45,13 @@ function ItemFactory:GetShortDesc( )
 end
 
 /*
+	Runtime check: is the factory valid? Can the item still be created?
+*/
+function ItemFactory:IsValid( )
+	return true
+end
+
+/*
 	Returns instance settings table
 */
 function ItemFactory:GetLoadedSettings( )

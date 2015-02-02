@@ -18,11 +18,21 @@ SingleItemFactory.Settings = {
 	Creates an item as needed
 */
 function SingleItemFactory:CreateItem( )
-	local item = Pointshop2.GetItemClassByName( self.settings["BasicSettings.ItemClass"] ):new( )
+	local class = Pointshop2.GetItemClassByName( self.settings["BasicSettings.ItemClass"] )
+	if not class then
+		return Promise.Reject( "Invalid item class " .. self.settings["BasicSettings.ItemClass"] )
+	end
+	
+	local item = class:new( )
 	return item:save( )
 	:Then( function( item )
 		return item
 	end )
+end
+
+function SingleItemFactory:IsValid( )
+	local class = Pointshop2.GetItemClassByName( self.settings["BasicSettings.ItemClass"] )
+	return class != nil
 end
 
 /*
@@ -34,6 +44,9 @@ end
 
 function SingleItemFactory:GetShortDesc( )
 	local class = Pointshop2.GetItemClassByName( self.settings["BasicSettings.ItemClass"] )
+	if not class then
+		return "<Invalid Item>"
+	end
 	return class.PrintName
 end
 

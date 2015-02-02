@@ -50,8 +50,8 @@ function PANEL:AddKeyInfo( )
 	local name
 	local keyClass = self.itemClass:GetRequiredKeyClass( )
 	if not keyClass then
-		KLogf( 3, "[ERROR] Invalid key class for item %s", tostring( itemDesc.itemClass ) )
-		name = "ERROR"
+		KLogf( 3, "[WARN] Invalid key class for item %s", tostring( self.itemClass.PrintName ) )
+		name = "<No Key Available>"
 	else
 		name = keyClass.PrintName
 	end
@@ -102,13 +102,17 @@ function PANEL:AddCrateContentInfo( )
 		local factory = factoryClass:new( )
 		factory.settings = info.factorySettings
 		
+		if not factory:IsValid( ) then
+			continue
+		end
+		
 		local label = vgui.Create( "DLabel", pnl )
 		label:SetText( factory:GetShortDesc( ) )
 		label:SetColor( Pointshop2.Drops.RarityColorMap[info.chance] )
 		label:Dock( TOP )
-		label:SizeToContents( )
 		label:DockMargin( 0, 5, 0, 0 )
 		label:SetFont( self:GetSkin( ).fontName )
+		label:SizeToContents( )
 	end
 end
 

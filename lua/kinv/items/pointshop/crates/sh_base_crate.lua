@@ -85,8 +85,9 @@ function ITEM:Unbox( )
 		
 		local instance = factoryClass:new( )
 		instance.settings = info.factorySettings
-		
-		table.insert( sumTbl, {sum = sum, factory = instance })
+		if instance:IsValid( ) then
+			table.insert( sumTbl, {sum = sum, factory = instance })
+		end
 	end
 
 	--Pick element

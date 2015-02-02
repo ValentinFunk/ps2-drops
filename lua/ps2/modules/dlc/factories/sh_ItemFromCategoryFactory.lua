@@ -27,6 +27,11 @@ ItemFromCategoryFactory.Settings = {
 	}
 }
 
+function ItemFromCategoryFactory:IsValid( )
+	local category = Pointshop2.GetCategoryByName( self.settings["ManualSettings.CategoryName"] )
+	return category != nil
+end
+
 /*
 	Creates an item as needed
 */

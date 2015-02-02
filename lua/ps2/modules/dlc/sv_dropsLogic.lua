@@ -23,6 +23,9 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 		
 		local instance = factoryClass:new( )
 		instance.settings = info.factorySettings
+		if not instance:IsValid( ) then
+			continue
+		end
 		
 		table.insert( sumTbl, {sum = sum, factory = instance, chance = info.chance })
 	end

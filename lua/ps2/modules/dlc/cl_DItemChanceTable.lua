@@ -143,6 +143,13 @@ function PANEL:AddFactory( factoryClass, settings, chance )
 	end
 	
 	line.factory = instance
+	if not line.factory:IsValid( ) then
+		line.Paint = function( p, w, h )
+			surface.SetDrawColor( 255, 0, 0 )
+			surface.DrawRect( 0, 0, w, h )
+		end
+		line:SetTooltip( "WARNING: The factory is no longer valid. Please remove it!" )
+	end
 end
 
 function PANEL:GetSaveData( )
