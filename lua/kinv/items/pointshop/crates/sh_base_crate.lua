@@ -63,9 +63,9 @@ function ITEM:OnUse( )
 	local key = self:GetOwner( ):PS2_GetFirstItemOfClass( self.class:GetRequiredKeyClass( ) )
 	Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, key )
 	:Then( function( )
-		timer.Simple( 0.5, function( )
+		--timer.Simple( 0.5, function( )
 			self:Unbox( )
-		end )
+		--end )
 		KLogf( 4, "Player %s unboxed a crate", ply:Nick( ) )
 	end, function( errid, err ) 
 		KLogf( 2, "Error unboxing crate item: %s", err )
@@ -92,6 +92,11 @@ function ITEM:Unbox( )
 		end
 	end
 
+	if #sumTbl == 0 then
+		KLogf( 2, "[DROPS] Error, crate %s: No valid item factories", self:GetPrintName( ) or self.class.PrintName )
+		return
+	end
+	
 	--Pick element
 	local r = math.random() * sum
 	local factory, chance
@@ -104,7 +109,7 @@ function ITEM:Unbox( )
 	end
 	
 	if not factory then 
-		KLogf( 3, "[ERROR] Could not unbox crate!" )
+		KLogf( 2, "[ERROR] Could not unbox crate!" )
 		PrintTable( sumTbl )
 		print( r )
 		error( ) --Abort and try to restore
@@ -134,10 +139,14 @@ function ITEM:Unbox( )
 		KInventory.ITEMS[item.id] = item
 		return ply.PS2_Inventory:addItem( item )
 		:Then( function( )
+			KLogf( 4, "Player %s unboxed %s, got item %s", ply:Nick( ), self:GetPrintName( ) or self.class.PrintName, item:GetPrintName( ) or item.class.PrintName )
 			item:OnPurchased( )
 			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
 			return item
 		end )
+	end )
+	:Fail( function( errid, err ) 
+		KLogf( 2, "[ERROR UNBOX] Error: %s %s", tostring( errid ), tostring( err ) )
 	end )
 	:Done( function( item )
 		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then 

@@ -12,7 +12,7 @@ function PANEL:Init( )
 	self.infoPanel:SetInfo( "Drops System", 
 [[The drops system works like this: 
 - Every few minutes (or after every round) each player gets a chance to get a drop
-- If a player is lucky they get a drop. To decide which drop they receive, the table below is used.
+- If a player is lucky they get a drop. To decide which item they receive, the table below is used.
 If a gamemode has an integration plugin, drops are given at round end, else they are given at the configured interval.
 ]] )
 	self.infoPanel:DockMargin( 0, 5, 0, 0 )
