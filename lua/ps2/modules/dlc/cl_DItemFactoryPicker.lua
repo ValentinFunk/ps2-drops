@@ -14,7 +14,7 @@ function PANEL:Init( )
 		pnl:SetText( "" )
 		pnl:DockMargin( 0, 5, 5, 5 )
 		
-		pnl.icon = vgui.Create( "DCenteredImage", pnl )
+		pnl.icon = vgui.Create( "DImage", pnl )
 		pnl.icon:SetSize( 64, 64 )
 		pnl.icon:Dock( LEFT )
 		pnl.icon:SetTooltip( "Click to Select" )
