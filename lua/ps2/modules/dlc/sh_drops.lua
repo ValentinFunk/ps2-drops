@@ -84,6 +84,8 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 		icon = "pointshop2/inbox3.png",
 		control = "DPointshopDropsConfigurator"
 	} )
+	
+	print( "Loaded PS2-Drops for Pointshop 2 v. " .. {{ user_id }} )
 end )
 
 Pointshop2.Drops = {}
