@@ -13,6 +13,10 @@ function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopMaterialIcon"
 end
 
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopMaterialIcon" 
+end
+
 function ITEM.static.getPersistence( )
 	return Pointshop2.CratePersistence
 end
