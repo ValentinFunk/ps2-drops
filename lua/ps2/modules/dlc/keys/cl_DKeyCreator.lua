@@ -76,6 +76,7 @@ Don't forget to upload the material to your fastdl, too!]] )
 	
 	self.choice = vgui.Create( "DRadioChoice", self.scroll )
 	self.choice:DockMargin( 5, 5, 5, 5 )
+	self.choice:Dock( TOP )
 	function self.choice:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
