@@ -103,7 +103,7 @@ function PANEL:SaveItem( saveTable )
 	self.BaseClass.SaveItem( self, saveTable )
 	
 	saveTable.material = self.manualEntry:GetText( )
-	saveTable.validCrate = self.choice:GetSelectedOption( ).class._persistenceId
+	saveTable.validCrate = self.choice:GetSelectedOption( ).class.className
 end
 
 function PANEL:EditItem( persistence, itemClass )
