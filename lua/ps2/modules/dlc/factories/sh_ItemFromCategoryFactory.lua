@@ -29,7 +29,15 @@ ItemFromCategoryFactory.Settings = {
 
 function ItemFromCategoryFactory:IsValid( )
 	local category = Pointshop2.GetCategoryByName( self.settings["ManualSettings.CategoryName"] )
-	return category != nil
+	if not category then
+		return false
+	end
+	
+	if #category.items == 0 then
+		return false
+	end
+	
+	return true
 end
 
 /*
@@ -62,10 +70,14 @@ function ItemFromCategoryFactory:CreateItem( )
 	local r = math.random() * sum
 	local itemClass
 	for _, info in ipairs( sumTbl ) do
-		if info.sum > r then
+		if info.sum >= r then
 			itemClass = info.itemClass
 			break
 		end
+	end
+	
+	if not itemClass then
+	
 	end
 	
 	local item = itemClass:new( )

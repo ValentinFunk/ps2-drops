@@ -46,7 +46,7 @@ end
 function ITEM.static:GetRequiredKeyClass( )
 	for k, itemClass in pairs( Pointshop2.GetRegisteredItems( ) ) do
 		if subclassOf( KInventory.Items.base_key, itemClass ) then
-			if itemClass.validCrate == self._persistenceId then
+			if tonumber( itemClass.validCrate ) == tonumber( self.className ) then
 				return itemClass
 			end
 		end
@@ -105,7 +105,7 @@ function ITEM:Unbox( )
 	local r = math.random() * sum
 	local factory, chance
 	for _, info in ipairs( sumTbl ) do
-		if info.sum > r then
+		if info.sum >= r then
 			factory = info.factory
 			chance = info.chance
 			break
