@@ -106,7 +106,7 @@ function Pointshop2.Drops.PerformDrops( )
 	
 	local dropChanceInPercent = Pointshop2.GetSetting( "Pointshop 2 DLC", "DropsSettings.DropChance" )
 	-- Gamemode plugins can exclude players from getting drops (e.g. spectators to avoid idling for drops)
-	local players = Pointshop2.IsCurrentGamemodePluginPresent( ) and Pointshop2.GetCurrentGamemodeModule( ).GetPlayersForDrops( ) or player.GetAll( )
+	local players = Pointshop2.IsCurrentGamemodePluginPresent( ) and Pointshop2.GetCurrentGamemodePlugin( ).GetPlayersForDrops( ) or player.GetAll( )
 	for k, v in pairs( players ) do
 		if math.random( ) * 100 > dropChanceInPercent then
 			continue
