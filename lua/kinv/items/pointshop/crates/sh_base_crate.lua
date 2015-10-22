@@ -14,7 +14,7 @@ function ITEM.static:GetPointshopIconControl( )
 end
 
 function ITEM.static:GetPointshopLowendIconControl( )
-	return "DPointshopMaterialIcon" 
+	return "DPointshopMaterialIcon"
 end
 
 function ITEM.static.getPersistence( )
@@ -57,28 +57,26 @@ function ITEM:CanBeUsed( )
 	if not self:GetOwner( ):PS2_GetFirstItemOfClass( self.class:GetRequiredKeyClass( ) ) then
 		return false, "You do not own the required key to open this crate"
 	end
-	
+
 	return true
 end
 
 function ITEM:OnUse( )
 	local ply = self:GetOwner( )
-	
+
 	local key = self:GetOwner( ):PS2_GetFirstItemOfClass( self.class:GetRequiredKeyClass( ) )
 	Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, key )
 	:Then( function( )
-		--timer.Simple( 0.5, function( )
-			self:Unbox( )
-		--end )
+		self:Unbox( )
 		KLogf( 4, "Player %s unboxed a crate", ply:Nick( ) )
-	end, function( errid, err ) 
+	end, function( errid, err )
 		KLogf( 2, "Error unboxing crate item: %s", err )
 	end )
 end
 
 function ITEM:Unbox( )
 	local ply = self:GetOwner( )
-	
+
 	--Generate cumulative sum table
 	local sumTbl = {}
 	local sum = 0
@@ -88,7 +86,7 @@ function ITEM:Unbox( )
 		if not factoryClass then
 			continue
 		end
-		
+
 		local instance = factoryClass:new( )
 		instance.settings = info.factorySettings
 		if instance:IsValid( ) then
@@ -100,7 +98,7 @@ function ITEM:Unbox( )
 		KLogf( 2, "[DROPS] Error, crate %s: No valid item factories", self:GetPrintName( ) or self.class.PrintName )
 		return
 	end
-	
+
 	--Pick element
 	local r = math.random() * sum
 	local factory, chance
@@ -111,31 +109,33 @@ function ITEM:Unbox( )
 			break
 		end
 	end
-	
-	if not factory then 
+
+	if not factory then
 		KLogf( 2, "[ERROR] Could not unbox crate!" )
 		PrintTable( sumTbl )
 		print( r )
 		error( ) --Abort and try to restore
 		return
 	end
-	
+
 	local item = factory:CreateItem( )
 	:Then( function( item )
+		print("Created", item)
 		local price = item.class:GetBuyPrice( ply )
+		PrintTable(price)
 		item.purchaseData = {
 			time = os.time( ),
 			origin = "Crate"
 		}
 		if price.points then
 			item.purchaseData.amount = price.points
-			item.purchaseData.currency = "points" 
+			item.purchaseData.currency = "points"
 		elseif price.premiumPoints then
-			item.purchaseData.amount = price.points
-			item.purchaseData.currency = "premiumPoints" 
+			item.purchaseData.amount = price.premiumPoints
+			item.purchaseData.currency = "premiumPoints"
 		else
 			item.purchaseData.amount = 0
-			item.purchaseData.currency = "points" 
+			item.purchaseData.currency = "points"
 		end
 		return item:save( )
 	end )
@@ -149,19 +149,19 @@ function ITEM:Unbox( )
 			return item
 		end )
 	end )
-	:Fail( function( errid, err ) 
+	:Fail( function( errid, err )
 		KLogf( 2, "[ERROR UNBOX] Error: %s %s", tostring( errid ), tostring( err ) )
 	end )
 	:Done( function( item )
-		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then 
+		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then
 			return
 		end
-		
+
 		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.Drops.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
 		if chance > minimumBroadcastChance then
 			return
 		end
-		
+
 		net.Start( "PS2D_AddChatText" )
 			net.WriteTable{
 				Color( 151, 211, 255 ),
