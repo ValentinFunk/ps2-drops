@@ -120,9 +120,7 @@ function ITEM:Unbox( )
 
 	local item = factory:CreateItem( )
 	:Then( function( item )
-		print("Created", item)
 		local price = item.class:GetBuyPrice( ply )
-		PrintTable(price)
 		item.purchaseData = {
 			time = os.time( ),
 			origin = "Crate"
