@@ -63,11 +63,11 @@ end
 
 function ITEM:OnUse( )
 	local ply = self:GetOwner( )
-
 	local key = self:GetOwner( ):PS2_GetFirstItemOfClass( self.class:GetRequiredKeyClass( ) )
-	Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, key )
+
+	self:Unbox()
 	:Then( function( )
-		self:Unbox( )
+		Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, key )
 		KLogf( 4, "Player %s unboxed a crate", ply:Nick( ) )
 	end, function( errid, err )
 		KLogf( 2, "Error unboxing crate item: %s", err )
@@ -115,10 +115,10 @@ function ITEM:Unbox( )
 		PrintTable( sumTbl )
 		print( r )
 		error( ) --Abort and try to restore
-		return
+		return def:Reject()
 	end
 
-	local item = factory:CreateItem( )
+	return factory:CreateItem( )
 	:Then( function( item )
 		local price = item.class:GetBuyPrice( ply )
 		item.purchaseData = {
