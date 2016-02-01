@@ -12,18 +12,18 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 		icon = "pointshop2/key63.png",
 		creator = "DKeyCreator"
 	} )
-	
+
 	MODULE.Settings.Server.DropsTableSettings = {
 		info = {
 			label = "Drops Settings",
 			isManualSetting = true, --Ignored by AutoAddSettingsTable
 		},
 		DropsData = {
-			value = true,
+			value = {},
 			type = "table"
 		},
 	}
-	
+
 	MODULE.Settings.Server.DropsSettings = {
 		info = {
 			label = "Drops Settings",
@@ -48,13 +48,13 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 			tooltip = "Chance that a player gets a drop when a drop is triggered."
 		},
 	}
-	
+
 	MODULE.Settings.Server.BroadcastDropsSettings = {
 		info = {
 			label = "Drops Chat Print Settings",
 		},
 		BroadcastRarity = {
-			value = "Uncommon", 
+			value = "Uncommon",
 			type = "option",
 			label = "Broadcast minimum Rarity",
 			tooltip = "Broadcast only unbox / drops if the item is above this rarity treshold",
@@ -68,7 +68,7 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 			}
 		},
 		BroadcastDrops = {
-			value = true, 
+			value = true,
 			label = "Broadcast drops in chat",
 			tooltip = "Posts a message to chat whenever a player gets a drop."
 		},
@@ -78,13 +78,13 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 			tooltip = "Posts a message to chat whenever a player unboxes a crate."
 		},
 	}
-	
+
 	table.insert( MODULE.SettingButtons, {
 		label = "Drops Setup",
 		icon = "pointshop2/inbox3.png",
 		control = "DPointshopDropsConfigurator"
 	} )
-	
+
 	print( "Loaded PS2-Drops for Pointshop 2 v. " .. "{{ user_id }}" )
 end )
 
