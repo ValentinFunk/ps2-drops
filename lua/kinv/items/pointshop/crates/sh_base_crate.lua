@@ -155,7 +155,7 @@ function ITEM:Unbox( )
 			return
 		end
 
-		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.Drops.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
+		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
 		if chance > minimumBroadcastChance then
 			return
 		end
@@ -168,7 +168,7 @@ function ITEM:Unbox( )
 				ply:Nick( ),
 				Color( 151, 211, 255 ),
 				" unboxed ",
-				Pointshop2.Drops.RarityColorMap[chance],
+				Pointshop2.RarityColorMap[chance],
 				item:GetPrintName( ),
 				Color( 151, 211, 255 ),
 				"!"

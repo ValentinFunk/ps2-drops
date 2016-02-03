@@ -72,7 +72,7 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 		return ply.PS2_Inventory:addItem( item )
 		:Then( function( )
 			item:OnPurchased( )
-			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "showDropsNotification", ply, item )
+			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayItemAddedNotify", ply, item, "You received a drop!" )
 			return item
 		end )
 	end )
@@ -81,7 +81,7 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 			return
 		end
 
-		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.Drops.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
+		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
 		if chance > minimumBroadcastChance then
 			return
 		end
@@ -94,7 +94,7 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 				ply:Nick( ),
 				Color( 151, 211, 255 ),
 				" found ",
-				Pointshop2.Drops.RarityColorMap[chance],
+				Pointshop2.RarityColorMap[chance],
 				item:GetPrintName( ),
 				Color( 151, 211, 255 ),
 				"!"
