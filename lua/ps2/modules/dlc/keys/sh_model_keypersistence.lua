@@ -1,5 +1,5 @@
 Pointshop2.KeyPersistence = class( "Pointshop2.KeyPersistence" )
-local KeyPersistence = Pointshop2.KeyPersistence 
+local KeyPersistence = Pointshop2.KeyPersistence
 
 KeyPersistence.static.DB = "Pointshop2"
 
@@ -26,6 +26,8 @@ KeyPersistence.static.model = {
 
 KeyPersistence:include( DatabaseModel )
 KeyPersistence:include( Pointshop2.EasyExport )
+
+CreateConVar("KeyPersistence_DbVersion", "{{ user_id | 69 }}", {FCVAR_NOTIFY})
 
 
 function KeyPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
