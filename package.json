@@ -21,5 +21,8 @@
   "release": {
     "getLastRelease": "last-release-git",
     "verifyConditions": "semantic-release-noop"
+  },
+  "generateNotes": {
+    "footerPartial": "changelog_footer_template.hbs"
   }
 }
