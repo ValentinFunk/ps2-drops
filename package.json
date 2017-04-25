@@ -1,0 +1,25 @@
+{
+  "name": "ps2-drops",
+  "version": "0.0.0-development",
+  "main": "index.js",
+  "repository": "git.kamshak.com:pointshop2/ps2-drops",
+  "author": "Valentin Funk <funk.valentin@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && scriptfodder-publish --version-from-package && semantic-sf-release post"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "devDependencies": {
+    "semantic-sf-release": "^1.0.0",
+    "dotenv": "^4.0.0",
+    "last-release-git": "^0.0.3",
+    "semantic-release-noop": "^1.1.0",
+    "scriptfodder-publish": "^1.6.2"
+  },
+  "release": {
+    "getLastRelease": "last-release-git",
+    "verifyConditions": "semantic-release-noop"
+  }
+}
