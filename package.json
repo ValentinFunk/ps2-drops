@@ -12,11 +12,11 @@
     "access": "restricted"
   },
   "devDependencies": {
-    "semantic-sf-release": "^1.0.0",
     "dotenv": "^4.0.0",
     "last-release-git": "^0.0.3",
+    "scriptfodder-publish": "^1.6.2",
     "semantic-release-noop": "^1.1.0",
-    "scriptfodder-publish": "^1.6.2"
+    "semantic-sf-release": "2.2.2"
   },
   "release": {
     "getLastRelease": "last-release-git",
