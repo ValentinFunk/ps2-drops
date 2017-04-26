@@ -2,7 +2,7 @@
   "name": "ps2-drops",
   "version": "0.0.0-development",
   "main": "index.js",
-  "repository": "git.kamshak.com:pointshop2/ps2-drops",
+  "repository": "git@github.com:Kamshak/ps2-drops.git",
   "author": "Valentin Funk <funk.valentin@gmail.com>",
   "license": "MIT",
   "scripts": {
