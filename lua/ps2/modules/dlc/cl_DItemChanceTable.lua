@@ -1,182 +1,285 @@
 local PANEL = {}
 
-function PANEL:Init( )
-	self.itemTable = vgui.Create( "DListView", self )
-	self.itemTable:Dock( FILL )
-	self.itemTable:SetMultiSelect( false )
-	self.itemTable:AddColumn( "Item" )
-	self.itemTable:AddColumn( "Chance" ):SetMaxWidth( 220 )
-	self.itemTable:AddColumn( "Actions" ):SetMaxWidth( 170 )
-	self.itemTable:SetDataHeight( 30 )
-	
-	self.bottomBar = vgui.Create( "DPanel", self )
-	self.bottomBar:Dock( BOTTOM )
-	self.bottomBar:DockMargin( 0, 5, 0, 0 )
-	self.bottomBar.Paint = function() end
-	self.bottomBar:SetTall( 40 )
-	
-	self.addBtn = vgui.Create( "DButton", self.bottomBar )
-	self.addBtn:SetImage( "pointshop2/plus24.png" )
-	self.addBtn.m_Image:SetSize( 16, 16 )
-	self.addBtn:SetText( "Add" )
-	self.addBtn:Dock( LEFT )
-	self.addBtn:SetSize( 100, 40 )
-	function self.addBtn.DoClick( )
-		local frame = vgui.Create( "DItemFactoryConfigurationFrame" )
-		frame:MakePopup( )
-		frame:Center( )
-		function frame.OnFinish( frame, class, settings )
-			if not settings then return end
-			
-			frame:Remove( )
-			self:AddFactory( class, settings )
+function PANEL:Init() 
+	self:DockPadding( 0, 5, 0, 0 )
+	self.stripContainer = vgui.Create("DPanel", self)
+	self.stripContainer:Dock(FILL)
+	function self.stripContainer:Paint() end
+	function self.stripContainer.PerformLayout()
+		if self.strip then
+			self.strip:SetTall(self:GetTall())
 		end
+	end
+
+	self.strip = vgui.Create("DPanel", self.stripContainer)
+	self.strip.Paint = function(self, w, h)
+		surface.SetDrawColor( 0, 0, 0, 1 )
+		surface.DrawRect(0, 0, w, h)
+	end
+
+	-- Arrange in singe row
+	function self.strip:PerformLayout()
+		local icons = self:GetChildren()
+		local x = 0
+		for k, icon in pairs(icons) do
+			icon:SetPos(x, 0)
+			icon:SetTall(self:GetTall() - 10)
+			x = x + icon:GetWide() + 5
+		end
+		self:SetWide(x - 5)
 	end
 end
 
-function PANEL:GenerateChanceControl( line )
-	local pnl = vgui.Create( "DPanel", line )
-	pnl:DockPadding( 10, 3, 10, 3 )
+/*
+	To generate the strip a weighted chance table 
+	for all items that all factories can generate is built.
+
+	Out of this table the given number of elements is picked to 
+	create a realistically possible distribution of items.
+*/
+function PANEL:GenerateStripItems()
 	
-	pnl.dropdown = vgui.Create( "DComboBox", pnl )
-	for k, v in ipairs( Pointshop2.Drops.Rarities ) do
-		pnl.dropdown:AddChoice( v.name, v.chance )
-	end
-	
-	pnl.dropdown:Dock( LEFT )
-	pnl.dropdown:SetWide( 120 )
-	pnl.dropdown:SetSkin( "Default" )
-	function pnl:GetChanceAmount( )
-		return self.dropdown.chance
-	end
-	function pnl:SetChanceAmount( amount )
-		for id, data in pairs( self.dropdown.Data ) do
-			if amount == data then
-				pnl.dropdown:ChooseOptionID( id )
+
+	--Pick element
+	local function getRandomItem()
+		local r = math.random() * sum
+		local itemOrInfo
+		for _, info in ipairs( sumTbl ) do
+			if info.sum >= r then
+				itemOrInfo = info.itemOrInfo
+				itemOrInfo._chance = info.chance / sum
+				break
 			end
 		end
+
+		return itemOrInfo
 	end
-	function pnl.dropdown.OnSelect( _self, index, value, data )
-		pnl.dropdown.chance = data
-		timer.Simple( 0, function( )
-			hook.Call( "UpdateChance" )
-		end)
-	end
+
 	
-	pnl.lbl = vgui.Create( "DLabel", pnl )
-	pnl.lbl:Dock( LEFT )
-	pnl.lbl:DockMargin ( 5, 0, 0, 0 )
-	hook.Add( "UpdateChance", pnl.lbl, function( )
-		local calcPercentage = ( pnl:GetChanceAmount( ) / self:GetCumulatedChance() ) * 100
-		pnl.lbl:SetText( Format( " = %.3f%%", calcPercentage ) )
-		pnl.lbl:SizeToContents( )
-		pnl.lbl:SetColor( color_black )
+
+	return itemsOnStrip
+end
+
+--[[
+	Generates the icon controls for the table of items
+	supplied.
+]]--
+function PANEL:GenerateStripIcons(itemsOnStrip)
+	for k, itemOrInfo in pairs(itemsOnStrip) do
+		local icon
+		if itemOrInfo.isInfoTable then
+			icon = itemOrInfo.getIcon()
+		else
+			local itemClass = itemOrInfo
+			icon = vgui.Create(itemClass.GetPointshopIconControl(), self)
+			icon:SetItemClass(itemClass)
+		end
+		
+		local itemChance = itemOrInfo._chance
+		local rarity = Pointshop2.GetRarityInfoFromNormalized(itemChance)
+		icon:SetRarity(rarity)
+		icon.noSelect = true
+		icon:SetWide(128)
+		icon:SetParent(self.strip)
+		local children = self.strip:GetChildren()
+		table.RemoveByValue( children, self )
+		table.insert(children, icon)
+		print(k, itemOrInfo.printName, itemOrInfo.PrintName)
+	end
+end
+
+function PANEL:SetCrate(crate)
+	self.crate = crate.class
+end
+
+function PANEL:Spin(targetItemIndex)
+	local minX = (targetItemIndex - 1) * 128 + (targetItemIndex - 1) * 5
+	local maxX = minX + 128
+	local pos = math.random(minX, maxX)
+	local promise, tweenInstance = LibK.tween( easing.outQuart, 10, function( p )
+		if IsValid(self.strip) then
+			self.strip:SetPos(-pos * p + 64, 0 )
+		end
 	end )
-
-	pnl.dropdown:ChooseOptionID( 2 )
-	return pnl
+	self.tweenInstance = tweenInstance
+	return promise
 end
 
-function PANEL:GetCumulatedChance( )
-	local sum = 0
-	for k, v in pairs( self.itemTable:GetLines( ) ) do
-		local amount = v.Columns[2]:GetChanceAmount( )
-		sum = sum + amount
-	end
-	return sum
-end
-
-function PANEL:GenerateActionsControl( line )
-	local pnl = vgui.Create( "DPanel", line )
-	pnl:DockPadding( 10, 3, 10, 3 )
-	
-	pnl.edit = vgui.Create( "DButton", pnl )
-	pnl.edit:SetText( "Configure" )
-	function pnl.edit.DoClick( )
-		local frame = vgui.Create( "DFrame" )
-		frame:SetSize( 800, math.Clamp( ScrH( ), 0, 768 ) )
-		frame:SetTitle( "Edit Settings" )
-		frame:SetSkin( Pointshop2.Config.DermaSkin )
-		
-		local ctrl = vgui.Create( line.factory:GetConfiguratorControl( ), frame )
-		ctrl:Dock( FILL )
-		ctrl:Edit( line.factory:GetLoadedSettings( ) )
-		
-		frame.save = vgui.Create( "DButton", frame )
-		frame.save:Dock( BOTTOM )
-		frame.save:SetText( "Save" )
-		function frame.save.DoClick( )
-			if not ctrl:GetSettingsForSave( ) then return end 
-			
-			line.factory.settings = ctrl:GetSettingsForSave( )
-			line.Columns[1]:SetText( line.factory:GetShortDesc( ) )
-			frame:Remove( )
+function PANEL:Paint(w, h)
+	if self.tweenInstance then
+		if self.tweenInstance:update() then
+			self.tweenInstance = nil
 		end
-		frame:MakePopup( )
-		frame:Center( )
-	end
-	pnl.edit:Dock( LEFT )
-	
-	pnl.remove = vgui.Create( "DButton", pnl )
-	pnl.remove:SetText( "Remove" )
-	function pnl.remove.DoClick( )
-		self.itemTable:RemoveLine( line:GetID( ) )
-		timer.Simple( 0, function( )
-			hook.Call( "UpdateChance" )
-		end)
-	end
-	pnl.remove:Dock( LEFT )
-	pnl.remove:DockMargin ( 5, 0, 0, 0 )
-	
-	return pnl
-end
-
-function PANEL:AddFactory( factoryClass, settings, chance )
-	local instance = factoryClass:new( )
-	instance.settings = settings
-	
-	local line = self.itemTable:AddLine( instance:GetShortDesc( ) )
-	line.Columns[2] = self:GenerateChanceControl( line )
-	line.Columns[3] = self:GenerateActionsControl( line )
-	if chance then
-		line.Columns[2]:SetChanceAmount( chance )
-	end
-	
-	line.factory = instance
-	if not line.factory:IsValid( ) then
-		line.Paint = function( p, w, h )
-			surface.SetDrawColor( 255, 0, 0 )
-			surface.DrawRect( 0, 0, w, h )
-		end
-		line:SetTooltip( "WARNING: The factory is no longer valid. Please remove it!" )
 	end
 end
 
-function PANEL:GetSaveData( )
-	local data = { }
-	for k, v in pairs( self.itemTable:GetLines( ) ) do
-		table.insert( data, { 
-			factoryClassName = v.factory.class.name, 
-			factorySettings = v.factory.settings,
-			chance = v.Columns[2]:GetChanceAmount( ) 
-		} ) 
-	end
-	return data
+function PANEL:PaintOver(w, h)
+	surface.SetDrawColor(self:GetSkin().Highlight or color_white)
+	surface.DrawRect(w / 2 - 2, 0, 4, h)
 end
 
-function PANEL:LoadSaveData( data )
-	for k, v in pairs( data ) do
-		local factoryClass = getClass( v.factoryClassName )
-		if not factoryClass then
-			KLogf( 3, "[ERROR] Invalid factory class %s", tostring( v.factoryClassName ) )
+vgui.Register( "DCrateOpenSpinner", PANEL, "DPanel" )
+
+
+local PANEL = {}
+
+function PANEL:Init()
+	self:SetSkin(Pointshop2.Config.DermaSkin)
+	self:DockPadding( 16, 8, 16, 16 )
+
+	self.m_fCreateTime = SysTime()
+	self:Center()
+	self:MakePopup()
+	self:DoModal()
+
+	self.loading = vgui.Create( "DLoadingNotifier", self )
+	self.loading:Dock( TOP )
+
+	self.crateIcon = vgui.Create("DCenteredImage", self)
+	self.crateIcon:Dock( TOP )
+	self.crateIcon:DockMargin( 16, 32, 16, 8 )
+	self.crateIcon:SetTall( 64 )
+
+	self.crateText = vgui.Create("DLabel", self)
+	self.crateText:SetText( "Unboxing Crate" )
+	self.crateText:Dock( TOP )
+	self.crateText:DockMargin( 16, 8, 16, 32 )
+	self.crateText:SetContentAlignment(5)
+	self.crateText:SetFont(self:GetSkin().SmallTitleFont)
+	self.crateText:SetColor(color_white)
+	self.crateText:SizeToContents()
+
+
+	self.crateSpinner = vgui.Create("DCrateOpenSpinner", self)
+	self.crateSpinner:Dock(TOP)
+	self.crateSpinner:SetTall(128 + 10)
+	self.crateSpinner:SetWide(5 * 128 + 4 * 128)
+end
+
+function PANEL:PerformLayout()
+	self.crateSpinner:SetWide(5 * 128 + 4 * 5)
+	self:SizeToChildren(true, true)
+	--self:SetWide(self.crateSpinner:GetWide() + 32)
+	self:Center()
+end
+
+--[[
+	Preloads icons that will be used to avoid lagg
+	when spinning.
+]]
+function PANEL:LoadIcons(items)
+	local promises = {}
+	for k, itemOrInfo in pairs(items) do
+		if itemOrInfo.isInfoTable then
 			continue
 		end
-		self:AddFactory( factoryClass, v.factorySettings, v.chance )
+
+		local itemClass = itemOrInfo
+		local control = _G[itemClass.GetPointshopIconControl()]
+		if control.PreloadIcon then
+			table.insert(promises, control.PreloadIcon(itemClass))
+		end
 	end
+
+	return WhenAllFinished(promises)
 end
 
-function PANEL:Paint( )
+function PANEL:UnpackCrate(crate, seed, itemId)
+	self.loading:Expand()
+	self.crateSpinner:SetCrate(crate)
+	self.crateText:SetText( "Unboxing " .. crate:GetPrintName() )
+	self.crateIcon:SetImage(crate.class.material)
 
+	math.randomseed(seed)
+	local items = crate:PickRandomItems(Pointshop2.Drops.WINNING_INDEX)
+	local winningItem = items[Pointshop2.Drops.WINNING_INDEX]
+
+	return self:LoadIcons(items)
+	:Then(function()
+		self.crateSpinner:GenerateStripIcons(items)
+		self.crateSpinner.strip:GetChildren()[Pointshop2.Drops.WINNING_INDEX].Paint = function(x, w, h)
+			surface.SetDrawColor(color_white)
+			surface.DrawRect(0, 0, w, h)
+		end
+		self.loading:Collapse()
+		return self.crateSpinner:Spin(Pointshop2.Drops.WINNING_INDEX)
+	end)
+	:Then(function()
+		Pointshop2View:getInstance():displayItemAddedNotify(KInventory.ITEMS[itemId], "You unboxed " .. crate:GetPrintName() .. ":")
+		
+		local itemIcon = self.crateSpinner.strip:GetChildren()[Pointshop2.Drops.WINNING_INDEX]
+		itemIcon:SetParent(nil)
+		self:Remove()
+		Pointshop2.ItemInYourFace(itemIcon)
+	end)
 end
 
-vgui.Register( "DItemChanceTable", PANEL, "DPanel" )
+function PANEL:Paint(w, h)
+	Derma_DrawBackgroundBlur( self, self.m_fCreateTime )
+	derma.SkinHook("Paint", "PointshopFrame", self, w, h)
+end
+vgui.Register( "DCrateOpenFrame", PANEL, "EditablePanel" )
+
+function Pointshop2.ItemInYourFace(itemIcon)
+	Pointshop2.InYourFaceItem = vgui.Create("DPanel")
+	Pointshop2.InYourFaceItem:SetSize(128, 128)
+	Pointshop2.InYourFaceItem:SetPaintedManually(true)
+	--Pointshop2.InYourFaceItem:SetParent(nil)
+	function Pointshop2.InYourFaceItem:Paint(w, h)
+		surface.SetDrawColor(color_white)
+		surface.DrawRect(0, 0, w, h)
+	end
+
+	itemIcon:SetParent(Pointshop2.InYourFaceItem)
+	itemIcon:Dock(FILL)
+
+	local start = Pointshop2.InYourFaceItem:GetWide()
+	local diff = math.min(ScrW(), ScrH()) - start
+	local promise, tween = LibK.tween( easing.outQuart, 1, function( p )
+		if not IsValid(Pointshop2.InYourFaceItem) then return end
+		Pointshop2.InYourFaceItem.size = { start + diff * p, start + diff * p }
+	end )
+	Pointshop2.InYourFaceItem.tween1 = tween
+	timer.Simple(0.7, function()
+		local promise, tween = LibK.tween( easing.outQuart, 0.3, function( p )
+			if not IsValid(Pointshop2.InYourFaceItem) then return end
+			Pointshop2.InYourFaceItem.blend = 1 - p
+		end )
+		Pointshop2.InYourFaceItem.tween2 = tween
+	end)
+end
+
+hook.Add("DrawOverlay", "drawinyourface", function()
+	if not IsValid(Pointshop2.InYourFaceItem) then
+		return
+	end
+
+	if Pointshop2.InYourFaceItem.tween1 then
+		if Pointshop2.InYourFaceItem.tween1:update() then
+			return Pointshop2.InYourFaceItem:Remove()
+		end
+	end
+	if Pointshop2.InYourFaceItem.tween2 then
+		if Pointshop2.InYourFaceItem.tween2:update() then
+			return Pointshop2.InYourFaceItem:Remove()
+		end
+	end
+
+	local itemIcon = Pointshop2.InYourFaceItem
+	surface.SetAlphaMultiplier(itemIcon.blend or 1)
+	DisableClipping(true)
+	
+		local w, h = unpack(Pointshop2.InYourFaceItem.size)
+		itemIcon:SetSize(w, h)
+		Pointshop2.InYourFaceItem:SetPaintedManually(false)
+		render.SetBlend(itemIcon.blend or 1)
+		itemIcon:PaintAt( ScrW() / 2 - w / 2, ScrH() / 2  - h / 2 )
+		if itemIcon.SetAlpha then
+			itemIcon:SetAlpha((itemIcon.blend or 1) * 255)
+		end
+		render.SetBlend(1)
+		Pointshop2.InYourFaceItem:SetPaintedManually(true)
+
+	DisableClipping(false)
+	surface.SetAlphaMultiplier(1.0)
+end)

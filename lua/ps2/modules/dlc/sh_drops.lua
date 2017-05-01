@@ -128,11 +128,39 @@ Pointshop2.Drops.RarityColorMap = {
 	[1] = Color( 255, 128, 0 )
 }
 
+Pointshop2.Drops.WINNING_INDEX = 35
+
 if SERVER then
 	util.AddNetworkString( "PS2D_AddChatText" )
+	util.AddNetworkString( "PS2D_OpenCrate" )
+
+	function Pointshop2.Drops.DisplayCrateOpenDialog(tbl)
+		print("sending", tbl.crateItemId, tbl.seed, tbl.wonItemId)
+		net.Start("PS2D_OpenCrate")
+			net.WriteUInt(tbl.crateItemId, 32)
+			net.WriteUInt(tbl.seed, 32)
+			net.WriteUInt(tbl.wonItemId, 32)
+		net.Send(tbl.ply)
+	end
 end
 if CLIENT then
 	net.Receive( "PS2D_AddChatText", function( )
 		chat.AddText( unpack( net.ReadTable( ) ) )
+	end )
+
+	net.Receive( "PS2D_OpenCrate", function( len )
+		local crateItemId = net.ReadUInt(32)
+		local seed = net.ReadUInt(32)
+		local wonItemId = net.ReadUInt(32)
+		print(crateItemId, seed, wonItemId)
+		local crate = KInventory.ITEMS[crateItemId]
+
+		if not crate then
+			KLogf(1, "[ERROR] Error displaying unbox dialog, crate %s not found in cache", crateItemId)
+			return
+		end
+
+		Pointshop2.CrateOpenFrame = vgui.Create("DCrateOpenFrame")
+		Pointshop2.CrateOpenFrame:UnpackCrate(crate, seed, wonItemId)
 	end )
 end
