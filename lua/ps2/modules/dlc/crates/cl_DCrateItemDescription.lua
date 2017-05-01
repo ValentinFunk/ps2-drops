@@ -95,8 +95,9 @@ function PANEL:AddCrateContentInfo( )
 	end
 	Derma_Hook( pnl, "Paint", "Paint", "InnerPanel" )
 
-	table.SortByMember( self.itemClass.itemMap, "chance", true )
-	for k, info in pairs( self.itemClass.itemMap ) do
+	local sortedChances = table.Copy(self.itemClass.itemMap)
+	table.SortByMember( sortedChances, "chance", true )
+	for k, info in pairs( sortedChances ) do
 		local factoryClass = getClass( info.factoryClassName )
 		if not factoryClass then continue end
 		local factory = factoryClass:new( )

@@ -98,7 +98,7 @@ function PANEL:Spin(targetItemIndex)
 	local pos = math.random(minX, maxX)
 	local promise, tweenInstance = LibK.tween( easing.outQuart, 10, function( p )
 		if IsValid(self.strip) then
-			self.strip:SetPos(-pos * p + 64, 0 )
+			self.strip:SetPos(-pos * p + self:GetWide() / 2, 0 )
 		end
 	end )
 	self.tweenInstance = tweenInstance
@@ -191,9 +191,8 @@ function PANEL:UnpackCrate(crate, seed, itemId)
 	self.crateIcon:SetImage(crate.class.material)
 
 	math.randomseed(seed)
-	local items = crate:PickRandomItems(Pointshop2.Drops.WINNING_INDEX)
-	local winningItem = items[Pointshop2.Drops.WINNING_INDEX]
-
+	local items = crate:PickRandomItems(Pointshop2.Drops.WINNING_INDEX + 5)
+	
 	return self:LoadIcons(items)
 	:Then(function()
 		self.crateSpinner:GenerateStripIcons(items)
@@ -202,7 +201,7 @@ function PANEL:UnpackCrate(crate, seed, itemId)
 			surface.DrawRect(0, 0, w, h)
 		end
 		self.loading:Collapse()
-		return self.crateSpinner:Spin(Pointshop2.Drops.WINNING_INDEX)
+		return self.crateSpinner:Spin(Pointshop2.Drops.WINNING_INDEX) -- Spins to the left border
 	end)
 	:Then(function()
 		Pointshop2View:getInstance():displayItemAddedNotify(KInventory.ITEMS[itemId], "You unboxed " .. crate:GetPrintName() .. ":")
@@ -215,71 +214,12 @@ function PANEL:UnpackCrate(crate, seed, itemId)
 end
 
 function PANEL:Paint(w, h)
-	Derma_DrawBackgroundBlur( self, self.m_fCreateTime )
+	DisableClipping(true)
+		surface.SetDrawColor(Color(0, 0, 0, 150))
+		local x, y = self:LocalToScreen( 0, 0 )
+		surface.DrawRect( x * -1, y * -1, ScrW(), ScrH() )
+		Derma_DrawBackgroundBlur( self, self.m_fCreateTime )
+	DisableClipping(false)
 	derma.SkinHook("Paint", "PointshopFrame", self, w, h)
 end
 vgui.Register( "DCrateOpenFrame", PANEL, "EditablePanel" )
-
-function Pointshop2.ItemInYourFace(itemIcon)
-	Pointshop2.InYourFaceItem = vgui.Create("DPanel")
-	Pointshop2.InYourFaceItem:SetSize(128, 128)
-	Pointshop2.InYourFaceItem:SetPaintedManually(true)
-	--Pointshop2.InYourFaceItem:SetParent(nil)
-	function Pointshop2.InYourFaceItem:Paint(w, h)
-		surface.SetDrawColor(color_white)
-		surface.DrawRect(0, 0, w, h)
-	end
-
-	itemIcon:SetParent(Pointshop2.InYourFaceItem)
-	itemIcon:Dock(FILL)
-
-	local start = Pointshop2.InYourFaceItem:GetWide()
-	local diff = math.min(ScrW(), ScrH()) - start
-	local promise, tween = LibK.tween( easing.outQuart, 1, function( p )
-		if not IsValid(Pointshop2.InYourFaceItem) then return end
-		Pointshop2.InYourFaceItem.size = { start + diff * p, start + diff * p }
-	end )
-	Pointshop2.InYourFaceItem.tween1 = tween
-	timer.Simple(0.7, function()
-		local promise, tween = LibK.tween( easing.outQuart, 0.3, function( p )
-			if not IsValid(Pointshop2.InYourFaceItem) then return end
-			Pointshop2.InYourFaceItem.blend = 1 - p
-		end )
-		Pointshop2.InYourFaceItem.tween2 = tween
-	end)
-end
-
-hook.Add("DrawOverlay", "drawinyourface", function()
-	if not IsValid(Pointshop2.InYourFaceItem) then
-		return
-	end
-
-	if Pointshop2.InYourFaceItem.tween1 then
-		if Pointshop2.InYourFaceItem.tween1:update() then
-			return Pointshop2.InYourFaceItem:Remove()
-		end
-	end
-	if Pointshop2.InYourFaceItem.tween2 then
-		if Pointshop2.InYourFaceItem.tween2:update() then
-			return Pointshop2.InYourFaceItem:Remove()
-		end
-	end
-
-	local itemIcon = Pointshop2.InYourFaceItem
-	surface.SetAlphaMultiplier(itemIcon.blend or 1)
-	DisableClipping(true)
-	
-		local w, h = unpack(Pointshop2.InYourFaceItem.size)
-		itemIcon:SetSize(w, h)
-		Pointshop2.InYourFaceItem:SetPaintedManually(false)
-		render.SetBlend(itemIcon.blend or 1)
-		itemIcon:PaintAt( ScrW() / 2 - w / 2, ScrH() / 2  - h / 2 )
-		if itemIcon.SetAlpha then
-			itemIcon:SetAlpha((itemIcon.blend or 1) * 255)
-		end
-		render.SetBlend(1)
-		Pointshop2.InYourFaceItem:SetPaintedManually(true)
-
-	DisableClipping(false)
-	surface.SetAlphaMultiplier(1.0)
-end)

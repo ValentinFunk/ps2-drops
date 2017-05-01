@@ -135,7 +135,6 @@ if SERVER then
 	util.AddNetworkString( "PS2D_OpenCrate" )
 
 	function Pointshop2.Drops.DisplayCrateOpenDialog(tbl)
-		print("sending", tbl.crateItemId, tbl.seed, tbl.wonItemId)
 		net.Start("PS2D_OpenCrate")
 			net.WriteUInt(tbl.crateItemId, 32)
 			net.WriteUInt(tbl.seed, 32)
@@ -152,9 +151,8 @@ if CLIENT then
 		local crateItemId = net.ReadUInt(32)
 		local seed = net.ReadUInt(32)
 		local wonItemId = net.ReadUInt(32)
-		print(crateItemId, seed, wonItemId)
-		local crate = KInventory.ITEMS[crateItemId]
 
+		local crate = KInventory.ITEMS[crateItemId]
 		if not crate then
 			KLogf(1, "[ERROR] Error displaying unbox dialog, crate %s not found in cache", crateItemId)
 			return
@@ -163,4 +161,18 @@ if CLIENT then
 		Pointshop2.CrateOpenFrame = vgui.Create("DCrateOpenFrame")
 		Pointshop2.CrateOpenFrame:UnpackCrate(crate, seed, wonItemId)
 	end )
+
+	-- Disable rendering when in the full screen crate thing to gain some extra FPS
+	local performanceHooks = {
+		"PreDrawOpaqueRenderables",
+		"PreDrawTranslucentRenderables",
+		"RenderScene"
+	}
+	for k, v in pairs(performanceHooks) do
+		hook.Add(v, "DisableForPerf", function()
+			if IsValid(Pointshop2.CrateOpenFrame) then
+				return true
+			end
+		end)
+	end
 end
