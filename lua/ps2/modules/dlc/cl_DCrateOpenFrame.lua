@@ -196,10 +196,6 @@ function PANEL:UnpackCrate(crate, seed, itemId)
 	return self:LoadIcons(items)
 	:Then(function()
 		self.crateSpinner:GenerateStripIcons(items)
-		self.crateSpinner.strip:GetChildren()[Pointshop2.Drops.WINNING_INDEX].Paint = function(x, w, h)
-			surface.SetDrawColor(color_white)
-			surface.DrawRect(0, 0, w, h)
-		end
 		self.loading:Collapse()
 		return self.crateSpinner:Spin(Pointshop2.Drops.WINNING_INDEX) -- Spins to the left border
 	end)

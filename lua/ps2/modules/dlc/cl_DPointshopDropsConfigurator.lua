@@ -54,7 +54,13 @@ end
 
 function PANEL:SetData( data )
 	self.actualSettings:SetData( data )
-	self.itemsTable:LoadSaveData( data["DropsTableSettings.DropsData"] )
+
+	if not istable(data) then
+		print("Data is ", type(data), data)
+		self.itemsTable:LoadSaveData( { } )
+	else
+		self.itemsTable:LoadSaveData( data["DropsTableSettings.DropsData"] )
+	end
 end
 
 function PANEL:Save( )
