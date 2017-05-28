@@ -65,7 +65,7 @@ function ITEM:OnUse( )
 	local ply = self:GetOwner( )
 	local key = self:GetOwner( ):PS2_GetFirstItemOfClass( self.class:GetRequiredKeyClass( ) )
 
-	self:Unbox()
+	return self:Unbox()
 	:Then( function( )
 		Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, key )
 		KLogf( 4, "Player %s unboxed a crate", ply:Nick( ) )
@@ -117,7 +117,6 @@ function ITEM:PickRandomItems(iterations)
 	--Pick element
 	local function getRandomItem()
 		local r = math.random() * sum
-		print("RandomCalled: ", r)
 		local itemOrInfo
 		for _, info in ipairs( sumTbl ) do
 			if info.sum >= r then
@@ -143,9 +142,6 @@ function ITEM:Unbox( )
 	local seed = math.random(10000)
 	math.randomseed(seed)
 	local items = self:PickRandomItems(Pointshop2.Drops.WINNING_INDEX )
-	for k, itemOrInfo in pairs(items) do
-		print(k, itemOrInfo.printName, itemOrInfo.PrintName)
-	end
 	local winningItem = items[Pointshop2.Drops.WINNING_INDEX]
 	local rarity = Pointshop2.GetRarityInfoFromNormalized(winningItem._chance)
 
