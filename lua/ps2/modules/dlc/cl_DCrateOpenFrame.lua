@@ -30,36 +30,6 @@ function PANEL:Init()
 	end
 end
 
-/*
-	To generate the strip a weighted chance table 
-	for all items that all factories can generate is built.
-
-	Out of this table the given number of elements is picked to 
-	create a realistically possible distribution of items.
-*/
-function PANEL:GenerateStripItems()
-	
-
-	--Pick element
-	local function getRandomItem()
-		local r = math.random() * sum
-		local itemOrInfo
-		for _, info in ipairs( sumTbl ) do
-			if info.sum >= r then
-				itemOrInfo = info.itemOrInfo
-				itemOrInfo._chance = info.chance / sum
-				break
-			end
-		end
-
-		return itemOrInfo
-	end
-
-	
-
-	return itemsOnStrip
-end
-
 --[[
 	Generates the icon controls for the table of items
 	supplied.
@@ -75,8 +45,8 @@ function PANEL:GenerateStripIcons(itemsOnStrip)
 			icon:SetItemClass(itemClass)
 		end
 		
-		local itemChance = itemOrInfo._chance
-		local rarity = Pointshop2.GetRarityInfoFromNormalized(itemChance)
+		local itemChance = itemOrInfo._displayChance
+		local rarity = Pointshop2.GetRarityInfoFromAbsolute(itemChance)
 		icon:SetRarity(rarity)
 		icon.noSelect = true
 		icon:SetWide(128)
