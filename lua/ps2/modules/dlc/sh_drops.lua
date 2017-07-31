@@ -158,8 +158,18 @@ if CLIENT then
 			return
 		end
 
+		-- Failsafe 
+		timer.Simple( 12, function()
+			if IsValid( Pointshop2.CrateOpenFrame ) then
+				Pointshop2.CrateOpenFrame:Remove()
+				Pointshop2View:getInstance():displayError( "There was a problem showing the crate unboxing. Please contact an admin and send them a console log.")
+				KLogf(1, "Had to kill the unboxing frame! %s", LibK.GLib.StackTrace ())
+			end
+		end )
+
 		Pointshop2.CrateOpenFrame = vgui.Create("DCrateOpenFrame")
 		Pointshop2.CrateOpenFrame:UnpackCrate(crate, seed, wonItemId)
+
 	end )
 
 	-- Disable rendering when in the full screen crate thing to gain some extra FPS
