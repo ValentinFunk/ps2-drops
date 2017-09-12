@@ -19,7 +19,7 @@ hook.Add( "PS2_ModulesLoaded", "DLC_Drops", function( )
 			isManualSetting = true, --Ignored by AutoAddSettingsTable
 		},
 		DropsData = {
-			value = true,
+			value = { },
 			type = "table"
 		},
 	}

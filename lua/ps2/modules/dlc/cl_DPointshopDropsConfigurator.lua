@@ -55,9 +55,9 @@ end
 function PANEL:SetData( data )
 	self.actualSettings:SetData( data )
 
-	if not istable(data) then
+	if not istable(data) or not istable(data["DropsTableSettings.DropsData"]) then
 		print("Data is ", type(data), data)
-		self.itemsTable:LoadSaveData( { } )
+		self.itemsTable:LoadSaveData( { ["DropsTableSettings.DropsData"] = {} } )
 	else
 		self.itemsTable:LoadSaveData( data["DropsTableSettings.DropsData"] )
 	end
