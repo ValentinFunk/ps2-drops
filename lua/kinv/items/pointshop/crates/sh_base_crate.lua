@@ -267,7 +267,7 @@ function ITEM:Unbox( )
 			return
 		end
 
-		local minimumBroadcastChance = Pointshop2.GetRarityInfoFromName( Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) ).chance
+		local minimumBroadcastChance = table.KeyFromValue(Pointshop2.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ))
 		if rarity.chance > minimumBroadcastChance then
 			return
 		end
