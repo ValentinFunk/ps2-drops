@@ -6,9 +6,6 @@ ITEM.material = ""
 ITEM.category = "Misc"
 ITEM.itemMap = {} --Maps chance to item factory
 
-function ITEM:initialize( )
-end
-
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopMaterialIcon"
 end
@@ -253,8 +250,7 @@ function ITEM:Unbox( )
 		KInventory.ITEMS[keyId] = nil
 		ply.PS2_Inventory:notifyItemRemoved(crateId)
 		ply.PS2_Inventory:notifyItemRemoved(keyId)
-		ply.PS2_Inventory:notifyItemAdded(item)
-
+		
 		KLogf( 4, "Player %s unboxed %s, got item %s", ply:Nick( ), self:GetPrintName( ) or self.class.PrintName, item:GetPrintName( ) or item.class.PrintName )
 		item:OnPurchased( )
 		return Promise.Delay(10, item) -- Wait for animation before broadcasting the chat message
@@ -263,6 +259,7 @@ function ITEM:Unbox( )
 		KLogf( 2, "[ERROR UNBOX] Error: %s %s", tostring( errid ), tostring( err ) )
 	end )
 	:Done( function( item )
+		ply.PS2_Inventory:notifyItemAdded(item)
 		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then
 			return
 		end

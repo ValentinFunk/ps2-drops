@@ -34,7 +34,7 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 	local r = math.random() * sum
 	local factory, chance
 	for _, info in ipairs( sumTbl ) do
-		if info.sum > r then
+		if info.sum >= r then
 			factory, chance = info.factory, info.chance
 			break
 		end
