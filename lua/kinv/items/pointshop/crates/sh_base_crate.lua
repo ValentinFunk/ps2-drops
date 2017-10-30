@@ -82,7 +82,7 @@ function ITEM:GetChanceTable()
 		local instance = factoryClass:new( )
 		instance.settings = info.factorySettings
 		if not instance:IsValid( ) then
- 			KLogf( 2, "[WARN] Crate %s factory %s IsValid() false: %s", self.crate:GetPrintName(), info.factoryClassName, instance:GetShortDesc( ) )
+ 			KLogf( 2, "[WARN] Crate %s factory %s IsValid() false: %s", self:GetPrintName(), info.factoryClassName, instance:GetShortDesc( ) )
 			continue
 		end
 
@@ -250,6 +250,11 @@ function ITEM:Unbox( )
 		KInventory.ITEMS[keyId] = nil
 		ply.PS2_Inventory:notifyItemRemoved(crateId)
 		ply.PS2_Inventory:notifyItemRemoved(keyId)
+		timer.Simple( 1, function()
+			if IsValid(ply) then
+				ply.PS2_Inventory:notifyItemAdded( item )
+			end
+		end )
 		
 		KLogf( 4, "Player %s unboxed %s, got item %s", ply:Nick( ), self:GetPrintName( ) or self.class.PrintName, item:GetPrintName( ) or item.class.PrintName )
 		item:OnPurchased( )
@@ -259,7 +264,6 @@ function ITEM:Unbox( )
 		KLogf( 2, "[ERROR UNBOX] Error: %s %s", tostring( errid ), tostring( err ) )
 	end )
 	:Done( function( item )
-		ply.PS2_Inventory:notifyItemAdded(item)
 		if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then
 			return
 		end
