@@ -10,5 +10,7 @@ package.json
 *.tmp.md
 .env
 yarn.lock
+dist
+build.js
 changelog_footer_template.hbs
 wercker.yml
