@@ -145,7 +145,12 @@ function PANEL:LoadIcons(items)
 		end
 
 		local itemClass = itemOrInfo
-		local control = _G[itemClass.GetPointshopIconControl()]
+		local control = _G[itemClass:GetConfiguredIconControl()]
+		if not control then
+			KLogf(2, "[WARNING] Pointshop 2 item class %s: Cannot find control %s in _G", itemClass.className, itemClass:GetConfiguredIconControl() or "<INVALID>")
+			continue
+		end
+		
 		if control.PreloadIcon then
 			table.insert(promises, control.PreloadIcon(itemClass))
 		end
