@@ -239,6 +239,8 @@ function ITEM:Unbox( )
 		end
 	end )
 	:Then( function( item )
+		KInventory.ITEMS[item.id] = item
+		Pointshop2.LogCacheEvent('ADD', 'unbox', item.id)
 		Pointshop2.Drops.DisplayCrateOpenDialog({
 			ply = ply,
 			crateItemId = crateId,
@@ -248,6 +250,8 @@ function ITEM:Unbox( )
 
 		KInventory.ITEMS[crateId] = nil
 		KInventory.ITEMS[keyId] = nil
+		Pointshop2.LogCacheEvent('REMOVE', 'unbox', crateId)
+		Pointshop2.LogCacheEvent('REMOVE', 'unbox', keyId)
 		ply.PS2_Inventory:notifyItemRemoved(crateId)
 		ply.PS2_Inventory:notifyItemRemoved(keyId)
 		timer.Simple( 1, function()
