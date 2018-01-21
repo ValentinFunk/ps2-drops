@@ -239,27 +239,21 @@ function ITEM:Unbox( )
 		end
 	end )
 	:Then( function( item )
-		KInventory.ITEMS[item.id] = item
-		Pointshop2.LogCacheEvent('ADD', 'unbox', item.id)
 		Pointshop2.Drops.DisplayCrateOpenDialog({
 			ply = ply,
 			crateItemId = crateId,
 			seed = seed,
 			wonItemId = item.id
 		})
-
+		
 		KInventory.ITEMS[crateId] = nil
 		KInventory.ITEMS[keyId] = nil
 		Pointshop2.LogCacheEvent('REMOVE', 'unbox', crateId)
 		Pointshop2.LogCacheEvent('REMOVE', 'unbox', keyId)
 		ply.PS2_Inventory:notifyItemRemoved(crateId)
 		ply.PS2_Inventory:notifyItemRemoved(keyId)
-		timer.Simple( 1, function()
-			if IsValid(ply) then
-				ply.PS2_Inventory:notifyItemAdded( item )
-			end
-		end )
 		
+		ply.PS2_Inventory:notifyItemAdded( item )
 		KLogf( 4, "Player %s unboxed %s, got item %s", ply:Nick( ), self:GetPrintName( ) or self.class.PrintName, item:GetPrintName( ) or item.class.PrintName )
 		item:OnPurchased( )
 		return Promise.Delay(10, item) -- Wait for animation before broadcasting the chat message

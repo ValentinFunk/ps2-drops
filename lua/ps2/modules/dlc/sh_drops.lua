@@ -158,6 +158,21 @@ if CLIENT then
 			return
 		end
 
+		if Pointshop2.ClientSettings.GetSetting('BasicSettings.NoUnbox') then
+			if not KInventory.ITEMS[wonItemId] then
+				KLogf(2, "[WARN] You unboxed item %i but it wasnt cached clientside", wonItemId)
+				return
+			end
+
+			Pointshop2View:getInstance():displayItemAddedNotify(KInventory.ITEMS[wonItemId], "You unboxed " .. crate:GetPrintName() .. ":")
+			return
+		end
+
+		if IsValid(Pointshop2.CrateOpenFrame) then
+			KLogf(2, "[WARN] Tried to open crate open frame - but another is already spinning")
+			return
+		end
+
 		-- Failsafe 
 		timer.Simple( 12, function()
 			if IsValid( Pointshop2.CrateOpenFrame ) then
