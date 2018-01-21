@@ -172,6 +172,23 @@ if CLIENT then
 
 	end )
 
+	hook.Add("Think", "PS2_BlackenInv", function()
+		if IsValid(Pointshop2.Menu) then
+			if IsValid(Pointshop2.CrateOpenFrame) and not Pointshop2.Menu.dropsBlackened then
+				Pointshop2.Menu.dropsBlackened = true
+				function Pointshop2.Menu:PaintOver(w, h)
+					surface.SetDrawColor(0, 0, 0)
+					surface.DrawRect(0, 0, w, h)
+				end
+				print("done1")
+			elseif (not IsValid(Pointshop2.CrateOpenFrame)) and Pointshop2.Menu.dropsBlackened then
+				Pointshop2.Menu.PaintOver = function() end
+				Pointshop2.Menu.dropsBlackened = false
+				print("done2")
+			end
+		end
+	end)
+
 	-- Disable rendering when in the full screen crate thing to gain some extra FPS
 	local performanceHooks = {
 		"PreDrawOpaqueRenderables",

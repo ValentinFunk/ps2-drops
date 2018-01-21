@@ -170,6 +170,8 @@ function PANEL:UnpackCrate(crate, seed, itemId)
 	
 	return self:LoadIcons(items)
 	:Then(function()
+		if not IsValid(self) or not IsValid(self.crateSpinner) then return end
+
 		self.crateSpinner:GenerateStripIcons(items)
 		self.loading:Collapse()
 		return self.crateSpinner:Spin(Pointshop2.Drops.WINNING_INDEX) -- Spins to the left border
@@ -177,6 +179,7 @@ function PANEL:UnpackCrate(crate, seed, itemId)
 	:Then(function()
 		Pointshop2View:getInstance():displayItemAddedNotify(KInventory.ITEMS[itemId], "You unboxed " .. crate:GetPrintName() .. ":")
 		
+		if not IsValid(self) or not IsValid(self.crateSpinner) then return end
 		local itemIcon = self.crateSpinner.strip:GetChildren()[Pointshop2.Drops.WINNING_INDEX]
 		itemIcon:SetParent(nil)
 		self:Remove()
