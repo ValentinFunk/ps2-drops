@@ -22,6 +22,9 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	ITEM.super.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
 	itemTable.material = persistenceItem.material
 	itemTable.itemMap = persistenceItem.itemMap
+	local sortedChances = table.Copy(itemTable.itemMap)
+	table.SortByMember( sortedChances, "chance", true )
+	itemTable.itemMapSorted = sortedChances
 end
 
 function ITEM.static.GetPointshopIconDimensions( )
