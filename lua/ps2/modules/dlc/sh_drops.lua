@@ -174,7 +174,7 @@ if CLIENT then
 		end
 
 		-- Failsafe 
-		timer.Simple( 12, function()
+		timer.Simple( 10.2, function()
 			if IsValid( Pointshop2.CrateOpenFrame ) then
 				Pointshop2.CrateOpenFrame:Remove()
 				Pointshop2View:getInstance():displayError( "There was a problem showing the crate unboxing. Please contact an admin and send them a console log.")
