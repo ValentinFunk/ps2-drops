@@ -63,8 +63,9 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 		end
 	end )
 	:Then( function( item )
-		return ply.PS2_Inventory:addItem( item )
-		:Then( function( )
+		return ply.fullyLoadedPromise:Then( function( )
+			return ply.PS2_Inventory:addItem( item )
+		end ):Then( function( )
 			item:OnPurchased( )
 			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
 			return item
