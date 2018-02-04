@@ -1,12 +1,7 @@
 function Pointshop2.Drops.AwardPlayerDrop( ply )
+	print("DoDrop", ply)
 	if not IsValid( ply ) then
 		return
-	end
-	
-	if  not ply.PS2_Inventory then
-		timer.Simple( 2, function( )
-			Pointshop2.Drops.AwardPlayerDrop( ply )
-		end )
 	end
 	
 	local dropMap = Pointshop2.GetSetting( "Pointshop 2 DLC", "DropsTableSettings.DropsData" )
@@ -44,7 +39,9 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 		return
 	end
 	
-	local item = factory:CreateItem( )
+	local item = ply.fullyLoadedPromise:Then( function()
+		return factory:CreateItem( true )
+	end )
 	:Then( function( item )
 		local price = item.class:GetBuyPrice( ply )
 		item.purchaseData = {
@@ -61,11 +58,10 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 			item.purchaseData.amount = 0
 			item.purchaseData.currency = "points" 
 		end
+		return item:save()
 	end )
 	:Then( function( item )
-		return ply.fullyLoadedPromise:Then( function( )
-			return ply.PS2_Inventory:addItem( item )
-		end ):Then( function( )
+		return ply.PS2_Inventory:addItem( item ):Then( function( )
 			item:OnPurchased( )
 			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
 			return item
@@ -100,6 +96,7 @@ end
 
 function Pointshop2.Drops.PerformDrops( )
 	if not Pointshop2.GetSetting( "Pointshop 2 DLC", "DropsSettings.EnableDrops" ) then
+		KLogf(4, "[PS2-DROPS] Not doing drops - drops are disabled globally in drops settings.")
 		return
 	end
 	
@@ -130,6 +127,7 @@ function Pointshop2.Drops.RegisterTimer( )
 	
 	--Drops over time is disabled for gamemodes with integration plugins
 	if Pointshop2.IsCurrentGamemodePluginPresent( ) and Pointshop2.GetSetting( "Pointshop 2 DLC", "DropsSettings.UseGamemodeDrops" ) then
+		KLogf(4, "[PS2-DROPS] Not using timer - gamemode plugin is present and Use Gamemode Drops is checked in drops settings.")
 		return
 	end
 	
@@ -137,6 +135,7 @@ function Pointshop2.Drops.RegisterTimer( )
 	timer.Create( "Pointshop2_DOT", delayInSeconds, 0, function( )
 		Pointshop2.Drops.PerformDrops( )
 	end )
+	KLogf(4, "[PS2-DROPS] Timer set up, %i seconds interval", delayInSeconds)
 end
 
 hook.Add( "PS2_OnSettingsUpdate", "Change", function( )
