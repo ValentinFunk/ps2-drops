@@ -63,8 +63,31 @@ function PANEL:SetData( data )
 	end
 end
 
+function PANEL:Validate(data)
+	if #table.GetKeys(data["DropsTableSettings.DropsData"]) == 0 then
+		return false, "Please add some drops to the table."
+	end
+
+	if data["DropsSettings.DropFrequency"] <= 0 then
+		return false, "Please specify a drop frequency greater than 0"
+	end
+
+	if data["DropsSettings.DropChance"] > 100 or data["DropsSettings.DropChance"] == 0 then
+		return false, "Please specify a Drop Chance greater than 0% and smaller or equal to 100%"
+	end
+
+	return true
+end
+
 function PANEL:Save( )
 	self.actualSettings.settings["DropsTableSettings.DropsData"] = self.itemsTable:GetSaveData( )
+	
+	local valid, error = self:Validate(self.actualSettings.settings)
+	if not valid then
+		Derma_Message(error, "Invalid Configuration")
+		return
+	end
+
 	Pointshop2View:getInstance( ):saveSettings( self.mod, "Server", self.actualSettings.settings )
 	self:Remove( )
 end
