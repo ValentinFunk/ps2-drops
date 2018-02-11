@@ -34,6 +34,7 @@ function PANEL:Init( )
 		--Open model selector
 		local window = vgui.Create( "DMaterialSelector" )
 		window:Center( )
+		window:DoModal()
 		window:MakePopup( )
 		Pointshop2View:getInstance( ):requestMaterials( "pointshop2" )
 		:Done( function( files )
