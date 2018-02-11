@@ -1,3 +1,14 @@
+do
+	local PANEL = {}
+
+	function PANEL:Init( )
+		self.keyPanel = vgui.Create( "DKeyCreator_Stage1" )
+		self.stepsPanel:AddStep( "Key Settings", self.keyPanel )
+	end
+
+	vgui.Register( "DKeyCreator", PANEL, "DItemCreator_Steps" )
+end
+
 local PANEL = {}
 
 function PANEL:Init( )
@@ -6,7 +17,6 @@ function PANEL:Init( )
 	/*
 		Table Element
 	*/
-	
 	
 	self.selectMatElem = vgui.Create( "DPanel" )
 	self.selectMatElem:SetTall( 64 )
@@ -101,25 +111,16 @@ Don't forget to upload the material to your fastdl, too!]] )
 end
 
 function PANEL:SaveItem( saveTable )
-	self.BaseClass.SaveItem( self, saveTable )
-	
 	saveTable.material = self.manualEntry:GetText( )
 	saveTable.validCrate = self.choice:GetSelectedOption( ).class.className
 end
 
 function PANEL:EditItem( persistence, itemClass )
-	self.BaseClass.EditItem( self, persistence.ItemPersistence, itemClass )
-	
 	self.manualEntry:SetText( persistence.material )
 	self.materialPanel:SetMaterial( persistence.material )
 end
 
 function PANEL:Validate( saveTable )
-	local succ, err = self.BaseClass.Validate( self, saveTable )
-	if not succ then
-		return succ, err
-	end
-	
 	if not self.choice:GetSelectedOption( ) then
 		return false, "You must select a crate type"
 	end
@@ -127,4 +128,7 @@ function PANEL:Validate( saveTable )
 	return true
 end
 
-vgui.Register( "DKeyCreator", PANEL, "DItemCreator" )
+function PANEL:Paint()
+end
+
+vgui.Register( "DKeyCreator_Stage1", PANEL, "DItemCreator_Stage" )

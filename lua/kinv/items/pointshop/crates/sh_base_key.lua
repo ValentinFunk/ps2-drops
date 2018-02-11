@@ -6,9 +6,6 @@ ITEM.material = ""
 ITEM.category = "Misc"
 ITEM.validCrates = {} --Array of crate base classes to unlock
 
-function ITEM:initialize( )
-end
-
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopMaterialIcon"
 end

@@ -65,10 +65,8 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 			item.purchaseData.amount = 0
 			item.purchaseData.currency = "points"
 		end
-		return item:save( )
 	end )
 	:Then( function( item )
-		KInventory.ITEMS[item.id] = item
 		return ply.PS2_Inventory:addItem( item )
 		:Then( function( )
 			item:OnPurchased( )

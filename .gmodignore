@@ -1,0 +1,16 @@
+node_modules/**
+package.json
+.gitignore
+.editorconfig
+.npmrc
+*.log
+.DS_Store
+*.tmp
+.gmodignore
+*.tmp.md
+.env
+yarn.lock
+dist
+build.js
+changelog_footer_template.hbs
+wercker.yml

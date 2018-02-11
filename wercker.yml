@@ -1,0 +1,14 @@
+box: node:7
+build:
+  steps:
+    - npm-install
+    - script:
+      name: update version
+      code: |
+        npm run sf-release
+  after-steps:
+    - slack-notifier:
+      url: $SLACK_URL
+      channel: general
+      username: DeployBot
+      branch: master
