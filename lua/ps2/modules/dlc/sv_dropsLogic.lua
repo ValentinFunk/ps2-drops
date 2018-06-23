@@ -40,6 +40,11 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 	end
 	
 	local item = ply.fullyLoadedPromise:Then( function()
+		if not ply:PS2_HasInventorySpace( 1 ) then
+			ply:PS2_DisplayError( "You do not have enough inventory space to receive drops. Please make some space to receive drops again." )
+			return Promise.Reject( 'Inventory Full' )
+		end
+
 		return factory:CreateItem( true )
 	end )
 	:Then( function( item )
@@ -72,7 +77,7 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 			return
 		end
 		
-		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.Drops.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
+		local minimumBroadcastChance = table.KeyFromValue( Pointshop2.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ) )
 		if chance > minimumBroadcastChance then
 			return
 		end
@@ -85,7 +90,7 @@ function Pointshop2.Drops.AwardPlayerDrop( ply )
 				ply:Nick( ),
 				Color( 151, 211, 255 ),
 				" found ",
-				Pointshop2.Drops.RarityColorMap[chance],
+				Pointshop2.RarityColorMap[chance],
 				item:GetPrintName( ),
 				Color( 151, 211, 255 ),
 				"!"
@@ -109,8 +114,7 @@ function Pointshop2.Drops.PerformDrops( )
 		end
 		
 		pcall( function( ) 
-			WhenAllFinished{ v.outfitsReceivedPromise:Promise( ), v.dynamicsReceivedPromise:Promise( ) }
-			:Done( function( )
+			v.fullyLoadedPromise:Done( function( )
 				Pointshop2.Drops.AwardPlayerDrop( v )
 			end )
 		end )

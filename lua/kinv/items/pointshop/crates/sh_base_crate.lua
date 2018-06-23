@@ -100,7 +100,7 @@ function ITEM:GetChanceTable()
 		
 		for _, chanceInfo in ipairs(chanceMap) do
 			local itemOrInfo, chance = chanceInfo.itemOrInfo, chanceInfo.chance
-			
+			local displayChance = chanceInfo.displayChance or factoryWeight
 			local weight = factoryWeight * ( chance / factoryItemWeightsSum )
 			if not LibK.isProperNumber(weight) then
 				print( factoryWeight, chance, factoryItemWeightsSum,chance / factoryItemWeightsSum, weight )
@@ -108,7 +108,7 @@ function ITEM:GetChanceTable()
 			end
 			sum = sum + weight
 			-- Chance represents the actual chance, display
-			table.insert(sumTbl, { sum = sum, itemOrInfo = itemOrInfo, chance = weight, displayChance = factoryWeight })
+			table.insert(sumTbl, { sum = sum, itemOrInfo = itemOrInfo, chance = weight, displayChance = displayChance })
 		end
 	end
 
@@ -192,6 +192,7 @@ function ITEM:Unbox( )
 		local price = item.class:GetBuyPrice( ply )
 		item.purchaseData = {
 			time = os.time( ),
+			rarity = rarity.chance,
 			origin = "Crate"
 		}
 		if price.points then

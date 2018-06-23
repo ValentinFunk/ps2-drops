@@ -107,7 +107,7 @@ function PANEL:AddCrateContentInfo( )
 		
 		local label = vgui.Create( "DLabel", pnl )
 		label:SetText( factory:GetShortDesc( ) )
-		label:SetColor( Pointshop2.Drops.RarityColorMap[info.chance] )
+		label:SetColor( Pointshop2.RarityColorMap[info.chance] )
 		label:Dock( TOP )
 		label:DockMargin( 0, 5, 0, 0 )
 		label:SetFont( self:GetSkin( ).fontName )
@@ -124,8 +124,8 @@ function PANEL:SetItem( item, noButtons )
 	end
 end
 
-function PANEL:SetItemClass( itemClass )
-	self.BaseClass.SetItemClass( self, itemClass )
+function PANEL:SetItemClass( itemClass, noBuyPanel )
+	self.BaseClass.SetItemClass( self, itemClass, noBuyPanel )
 	self:AddKeyInfo( )
 	self:AddCrateContentInfo( )
 end
