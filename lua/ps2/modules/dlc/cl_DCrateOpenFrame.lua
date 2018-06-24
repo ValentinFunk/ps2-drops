@@ -138,25 +138,22 @@ end
 	when spinning.
 ]]
 function PANEL:LoadIcons(items)
-	local promises = {}
-	for k, itemOrInfo in pairs(items) do
+	return Promise.Map(items, function(itemOrInfo)
 		if itemOrInfo.isInfoTable then
-			continue
-		end
+			return itemOrInfo.PreloadIcon and itemOrInfo:PreloadIcon()
+		else
+			local itemClass = itemOrInfo
+			local control = _G[itemClass:GetConfiguredIconControl()]
+			if not control then
+				KLogf(2, "[WARNING] Pointshop 2 item class %s: Cannot find control %s in _G", itemClass.className, itemClass:GetConfiguredIconControl() or "<INVALID>")
+				continue
+			end
 
-		local itemClass = itemOrInfo
-		local control = _G[itemClass:GetConfiguredIconControl()]
-		if not control then
-			KLogf(2, "[WARNING] Pointshop 2 item class %s: Cannot find control %s in _G", itemClass.className, itemClass:GetConfiguredIconControl() or "<INVALID>")
-			continue
+			if control.PreloadIcon then
+				table.insert(promises, control.PreloadIcon(itemClass))
+			end
 		end
-		
-		if control.PreloadIcon then
-			table.insert(promises, control.PreloadIcon(itemClass))
-		end
-	end
-
-	return WhenAllFinished(promises)
+	end)
 end
 
 function PANEL:UnpackCrate(crate, seed, itemId)
