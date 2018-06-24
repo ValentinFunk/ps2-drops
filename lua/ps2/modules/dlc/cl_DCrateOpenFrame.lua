@@ -138,6 +138,8 @@ end
 	when spinning.
 ]]
 function PANEL:LoadIcons(items)
+	KLogf(5, "OpenFrame: Generating item icons")
+	self.ItemsLoading = true
 	return Promise.Map(items, function(itemOrInfo)
 		if itemOrInfo.isInfoTable then
 			return itemOrInfo.PreloadIcon and itemOrInfo:PreloadIcon()
@@ -153,6 +155,9 @@ function PANEL:LoadIcons(items)
 				table.insert(promises, control.PreloadIcon(itemClass))
 			end
 		end
+	end):Then(function()
+		self.ItemsLoading = false
+		KLogf(5, "OpenFrame: Done generating item icons")
 	end)
 end
 

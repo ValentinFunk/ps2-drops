@@ -184,7 +184,7 @@ if CLIENT then
 	}
 	for k, v in pairs(performanceHooks) do
 		hook.Add(v, "DisableForPerf", function()
-			if IsValid(Pointshop2.CrateOpenFrame) then
+			if IsValid(Pointshop2.CrateOpenFrame) and not Pointshop2.CrateOpenFrame.ItemsLoading then
 				return true
 			end
 		end)
