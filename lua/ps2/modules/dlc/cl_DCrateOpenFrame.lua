@@ -142,7 +142,7 @@ function PANEL:LoadIcons(items)
 	self.ItemsLoading = true
 	return Promise.Map(items, function(itemOrInfo)
 		if itemOrInfo.isInfoTable then
-			return itemOrInfo.PreloadIcon and itemOrInfo:PreloadIcon()
+			return itemOrInfo.preloadIcon and itemOrInfo:preloadIcon()
 		else
 			local itemClass = itemOrInfo
 			local control = _G[itemClass:GetConfiguredIconControl()]
