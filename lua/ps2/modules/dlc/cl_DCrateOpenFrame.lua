@@ -141,8 +141,8 @@ function PANEL:LoadIcons(items)
 	KLogf(5, "OpenFrame: Generating item icons")
 	self.ItemsLoading = true
 	return Promise.Map(items, function(itemOrInfo)
-		if itemOrInfo.isInfoTable and itemOrInfo.PreloadIcon then
-			return itemOrInfo:PreloadIcon()
+		if itemOrInfo.isInfoTable and itemOrInfo.preloadIcon then
+			return itemOrInfo:preloadIcon()
 		else
 			local itemClass = itemOrInfo
 			local control = _G[itemClass:GetConfiguredIconControl()]
