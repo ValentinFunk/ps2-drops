@@ -141,18 +141,18 @@ function PANEL:LoadIcons(items)
 	KLogf(5, "OpenFrame: Generating item icons")
 	self.ItemsLoading = true
 	return Promise.Map(items, function(itemOrInfo)
-		if itemOrInfo.isInfoTable then
-			return itemOrInfo.PreloadIcon and itemOrInfo:PreloadIcon()
+		if itemOrInfo.isInfoTable and itemOrInfo.PreloadIcon then
+			return itemOrInfo:PreloadIcon()
 		else
 			local itemClass = itemOrInfo
 			local control = _G[itemClass:GetConfiguredIconControl()]
 			if not control then
 				KLogf(2, "[WARNING] Pointshop 2 item class %s: Cannot find control %s in _G", itemClass.className, itemClass:GetConfiguredIconControl() or "<INVALID>")
-				continue
+				return
 			end
 
 			if control.PreloadIcon then
-				table.insert(promises, control.PreloadIcon(itemClass))
+				return control.PreloadIcon(itemClass)
 			end
 		end
 	end):Then(function()
