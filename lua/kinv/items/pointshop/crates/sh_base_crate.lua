@@ -272,6 +272,9 @@ function ITEM:Unbox( )
         if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then
             return
         end
+        if not IsValid( ply ) then
+            return
+        end
 
         local minimumBroadcastChance = table.KeyFromValue(Pointshop2.RarityMap, Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastRarity" ))
         if rarity.chance > minimumBroadcastChance then
