@@ -36,7 +36,7 @@ function PANEL:AddKeyInfo( )
 	if IsValid( self.singleUsePanel ) then
 		self.singleUsePanel:Remove( )
 	end
-	
+
 	self.singleUsePanel = vgui.Create( "DPanel", self )
 	self.singleUsePanel:Dock( TOP )
 	self.singleUsePanel:DockMargin( 0, 8, 0, 0 )
@@ -46,7 +46,7 @@ function PANEL:AddKeyInfo( )
 	function self.singleUsePanel:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
-	
+
 	local name
 	local keyClass = self.itemClass:GetRequiredKeyClass( )
 	if not keyClass then
@@ -55,7 +55,7 @@ function PANEL:AddKeyInfo( )
 	else
 		name = keyClass.PrintName
 	end
-		
+
 	local label = vgui.Create( "DLabel", self.singleUsePanel )
 	label:SetText( "This item requires a " .. name .. " to open" )
 	label:Dock( TOP )
@@ -66,7 +66,7 @@ function PANEL:AddCrateContentInfo( )
 	if IsValid( self.crateContentPanel ) then
 		self.crateContentPanel:Remove( )
 	end
-	
+
 	self.crateContentPanel = vgui.Create( "DPanel", self )
 	self.crateContentPanel:Dock( TOP )
 	self.crateContentPanel:DockMargin( 0, 8, 0, 0 )
@@ -76,12 +76,12 @@ function PANEL:AddCrateContentInfo( )
 	function self.crateContentPanel:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
-	
+
 	local label = vgui.Create( "DLabel", self.crateContentPanel )
 	label:SetText( "Contains one of the following items:" )
 	label:Dock( TOP )
 	label:SizeToContents( )
-	
+
 	local pnl = vgui.Create( "DPanel", self.crateContentPanel )
 	pnl:Dock( TOP )
 	pnl:DockPadding( 5, 0, 5, 5 )
@@ -100,11 +100,11 @@ function PANEL:AddCrateContentInfo( )
 		if not factoryClass then continue end
 		local factory = factoryClass:new( )
 		factory.settings = info.factorySettings
-		
+
 		if not factory:IsValid( ) then
 			continue
 		end
-		
+
 		local label = vgui.Create( "DLabel", pnl )
 		label:SetText( factory:GetShortDesc( ) )
 		label:SetColor( Pointshop2.RarityColorMap[info.chance] )
