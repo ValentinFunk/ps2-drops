@@ -93,7 +93,7 @@ function ITEM:GetChanceTable()
         local factoryWeight = info.chance
         local chanceMap = instance:GetChanceTable()
         local factoryItemWeightsSum = LibK._.reduce(
-            LibK._.pluck(chanceMap, 'chance'), 0, function(sum, item)
+            LibK._.pluck( chanceMap, 'chance' ), 0, function( sum, item )
                 return sum + item
             end )
 
@@ -103,11 +103,11 @@ function ITEM:GetChanceTable()
             local weight = factoryWeight * ( chance / factoryItemWeightsSum )
             if not LibK.isProperNumber(weight) then
                 print( factoryWeight, chance, factoryItemWeightsSum,chance / factoryItemWeightsSum, weight )
-                LibK.GLib.Error("BaseCrate:GetChanceTable - Invalid item weight!")
+                LibK.GLib.Error( "BaseCrate:GetChanceTable - Invalid item weight!" )
             end
             sum = sum + weight
             -- Chance represents the actual chance, display
-            table.insert(sumTbl, { sum = sum, itemOrInfo = itemOrInfo, chance = weight, displayChance = displayChance })
+            table.insert( sumTbl, { sum = sum, itemOrInfo = itemOrInfo, chance = weight, displayChance = displayChance } )
         end
     end
 
@@ -119,17 +119,26 @@ function ITEM:InternalOnUse( )
     if self.used or not self:CanBeUsed( ) then
         return
     end
-
-    local succ, err = pcall( self.OnUse, self )
-    if not succ then
-        LibK.GLib.Error( Format( "[ERROR] Item %s Use failed: %s", self.class.name, err ) )
-        return
-    end
     self.used = true
 
     local ply = self:GetOwner( )
-    Promise.Resolve()
-    :Then(function()
+    ply._ItemUseLock = ply._ItemUseLock or Promise.Resolve()
+    if getPromiseState(ply._ItemUseLock) != "pending" then
+        ply._ItemUseLock = Promise.Resolve()
+    end
+
+    ply._ItemUseLock = ply._ItemUseLock:Then(function()
+        if not IsValid( ply ) then
+            return Promise.Reject( "Player disconnected during use" )
+        end
+
+        local succ, err = pcall( self.OnUse, self )
+        if not succ then
+            LibK.GLib.Error( Format( "[ERROR] Item %s Use failed: %s", self.class.name, err ) )
+            ply._ItemUseLock = nil
+            return
+        end
+
         -- Pcall returns either the argument or the returned value
         -- By wrapping the return value in a promise here we make sure
         -- that if a promise is returned we wait on it.
@@ -137,15 +146,15 @@ function ITEM:InternalOnUse( )
     end):Then( function( )
         KLogf( 4, "Player %s used an item", ply:Nick( ) )
     end, function( errid, err )
-        LibK.GLib.Error( Format( "Error using item: %s %s", tostring(errid), tostring(err) ) )
+        LibK.GLib.Error( Format( "Error using item: %s %s", tostring( errid ), tostring( err ) ) )
     end )
 end
 
-function ITEM:PickRandomItems(iterations)
-    local sumTbl, sum = self:GetChanceTable()
+function ITEM:PickRandomItems( iterations )
+    local sumTbl, sum = self:GetChanceTable( )
     --Pick element
-    local function getRandomItem()
-        local r = math.random() * sum
+    local function getRandomItem( )
+        local r = math.random( ) * sum
         local itemOrInfo
         for _, info in ipairs( sumTbl ) do
             if info.sum >= r then
@@ -159,10 +168,10 @@ function ITEM:PickRandomItems(iterations)
         return itemOrInfo
     end
 
-    local itemsPicked = {}
+    local itemsPicked = { }
     for i = 1, iterations do
-        local item = getRandomItem()
-        table.insert(itemsPicked, item)
+        local item = getRandomItem( )
+        table.insert( itemsPicked, item )
     end
     return itemsPicked
 end
@@ -176,18 +185,18 @@ function ITEM:Unbox( )
     math.randomseed(seed)
     local items = self:PickRandomItems( Pointshop2.Drops.WINNING_INDEX )
     local winningItem = items[Pointshop2.Drops.WINNING_INDEX]
-    local rarity = Pointshop2.GetRarityInfoFromAbsolute(winningItem._displayChance)
+    local rarity = Pointshop2.GetRarityInfoFromAbsolute( winningItem._displayChance )
     local crateId = self.id
     local keyId
-    return Promise.Resolve()
-    :Then(function()
+    return Promise.Resolve( )
+    :Then( function( )
         if winningItem.isInfoTable then
             return winningItem.createItem( true )
         else
             return winningItem:new( )
         end
-    end)
-    :Then(function(item)
+    end )
+    :Then( function( item )
         local price = item.class:GetBuyPrice( ply )
         item.purchaseData = {
             time = os.time( ),
@@ -206,39 +215,39 @@ function ITEM:Unbox( )
         end
 
         item.inventory_id = ply.PS2_Inventory.id
-        item:preSave()
+        item:preSave( )
         keyId = key.id
         if Pointshop2.DB.CONNECTED_TO_MYSQL then
             local transaction = LibK.TransactionMysql:new(Pointshop2.DB)
-            transaction:begin()
-            transaction:add(item:getSaveSql()) -- Create Item
-            transaction:add(Format("DELETE FROM kinv_items WHERE id IN(%i, %i)", self.id, key.id)) -- Remove crate & key
-            return transaction:commit():Then(function()
-                return Pointshop2.DB.DoQuery("SELECT LAST_INSERT_ID() as id")
-            end ):Then(function(id)
+            transaction:begin( )
+            transaction:add( item:getSaveSql( ) ) -- Create Item
+            transaction:add( Format( "DELETE FROM kinv_items WHERE id IN(%i, %i)", self.id, key.id ) ) -- Remove crate & key
+            return transaction:commit( ):Then( function( )
+                return Pointshop2.DB.DoQuery( "SELECT LAST_INSERT_ID() as id" )
+            end ):Then( function( id )
                 item.id = id[1].id
                 return item
-            end):Then(Promise.Resolve, function(err)
-                LibK.GLib.Error("BaseCrate:Unbox - Error running sql " + tostring(err))
-                return Pointshop2.DB.DoQuery("ROLLBACK"):Then( function()
+            end):Then( Promise.Resolve, function( err )
+                LibK.GLib.Error( "BaseCrate:Unbox - Error running sql " + tostring( err ) )
+                return Pointshop2.DB.DoQuery("ROLLBACK"):Then( function( )
                     return Promise.Reject( "Error!" )
                 end )
             end )
         else
-            sql.Begin()
+            sql.Begin( )
             -- Remove crate and key
-            self:remove(true):Then(function()
-                return key:remove(true)
-            end):Then(function()
+            self:remove( true ):Then( function( )
+                return key:remove( true )
+            end):Then( function( )
                 item.inventory_id = ply.PS2_Inventory.id
                 return item:save()
-            end):Then(function()
+            end):Then( function( )
                 sql.Commit()
-            end, function(err)
-                sql.Query("ROLLBACK")
-                return Promise.Reject(err)
+            end, function( err )
+                sql.Query( "ROLLBACK")
+                return Promise.Reject( err )
             end)
-            return Promise.Resolve(item)
+            return Promise.Resolve( item )
         end
     end )
     :Then( function( item )
@@ -251,10 +260,10 @@ function ITEM:Unbox( )
 
         KInventory.ITEMS[crateId] = nil
         KInventory.ITEMS[keyId] = nil
-        Pointshop2.LogCacheEvent('REMOVE', 'unbox', crateId)
-        Pointshop2.LogCacheEvent('REMOVE', 'unbox', keyId)
-        ply.PS2_Inventory:notifyItemRemoved(crateId)
-        ply.PS2_Inventory:notifyItemRemoved(keyId)
+        Pointshop2.LogCacheEvent( 'REMOVE', 'unbox', crateId )
+        Pointshop2.LogCacheEvent( 'REMOVE', 'unbox', keyId )
+        ply.PS2_Inventory:notifyItemRemoved( crateId )
+        ply.PS2_Inventory:notifyItemRemoved( keyId )
 
         ply.PS2_Inventory:notifyItemAdded( item )
         KLogf( 4, "Player %s unboxed %s, got item %s", ply:Nick( ), self:GetPrintName( ) or self.class.PrintName, item:GetPrintName( ) or item.class.PrintName )
@@ -266,6 +275,9 @@ function ITEM:Unbox( )
     end )
     :Done( function( item )
         if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then
+            return
+        end
+        if not IsValid( ply ) then
             return
         end
 
