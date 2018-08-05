@@ -259,12 +259,7 @@ function ITEM:Unbox( )
         ply.PS2_Inventory:notifyItemAdded( item )
         KLogf( 4, "Player %s unboxed %s, got item %s", ply:Nick( ), self:GetPrintName( ) or self.class.PrintName, item:GetPrintName( ) or item.class.PrintName )
         item:OnPurchased( )
-        return Promise.Delay(10, item) -- Wait for animation before broadcasting the chat message
-    end )
-    :Fail( function( errid, err )
-        KLogf( 2, "[ERROR UNBOX] Error: %s %s", tostring( errid ), tostring( err ) )
-    end )
-    :Done( function( item )
+
         if not Pointshop2.GetSetting( "Pointshop 2 DLC", "BroadcastDropsSettings.BroadcastUnbox" ) then
             return
         end
@@ -274,20 +269,27 @@ function ITEM:Unbox( )
             return
         end
 
-        net.Start( "PS2D_AddChatText" )
-            net.WriteTable{
-                Color( 151, 211, 255 ),
-                "Player ",
-                Color( 255, 255, 0 ),
-                ply:Nick( ),
-                Color( 151, 211, 255 ),
-                " unboxed ",
-                rarity.color,
-                item:GetPrintName( ),
-                Color( 151, 211, 255 ),
-                "!"
-            }
-        net.Broadcast( )
+        local nick, rarityColor, itemName = ply:Nick( ), rarity.color, item:GetPrintName( )
+        -- Wait for animation before broadcasting the chat message
+        Promise.Delay( 10 ):Then( function( )
+            net.Start( "PS2D_AddChatText" )
+                net.WriteTable{
+                    Color( 151, 211, 255 ),
+                    "Player ",
+                    Color( 255, 255, 0 ),
+                    nick,
+                    Color( 151, 211, 255 ),
+                    " unboxed ",
+                    rarityColor,
+                    itemName,
+                    Color( 151, 211, 255 ),
+                    "!"
+                }
+            net.Broadcast( )
+        end )
+    end )
+    :Fail( function( errid, err )
+        KLogf( 2, "[ERROR UNBOX] Error: %s %s", tostring( errid ), tostring( err ) )
     end )
 end
 
